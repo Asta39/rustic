@@ -333,6 +333,150 @@ const JK={
         back:[{x1:52,y1:110,x2:52,y2:560,t:"SLV 66 (RAGLAN)",v:true}]},
   callouts:{front:[C(300,22,"1"),C(246,262,"2"),C(220,456,"3"),C(374,186,"4")],back:[C(300,214,"5"),C(140,380,"6")]}
 };
+
+const LOOPS='<g fill="none" stroke="var(--line)" stroke-width="1.6"><rect x="214" y="58" width="8" height="34"/><rect x="262" y="58" width="8" height="34"/><rect x="330" y="58" width="8" height="34"/><rect x="378" y="58" width="8" height="34"/></g>';
+const WB=["M190 90 L410 90"];
+const TRO="M196 60 L404 60 L410 90 Q420 200 414 300 L396 600 L316 600 L304 250 L296 250 L284 600 L204 600 L186 300 Q180 200 190 90 Z";
+const TR={
+  outline:{front:TRO,back:TRO},
+  solid:{front:[...WB,"M206 92 Q220 150 190 172","M394 92 Q380 150 410 172"],back:[...WB,"M190 118 Q300 146 410 118","M300 60 L300 250","M214 170 L276 170","M324 170 L386 170"]},
+  dashed:{front:["M312 90 L312 210 Q312 232 300 242","M244 104 L244 596","M356 104 L356 596","M204 588 L284 588","M316 588 L396 588","M196 84 L404 84"],back:["M204 588 L284 588","M316 588 L396 588","M196 84 L404 84"]},
+  extra:{front:LOOPS+'<circle cx="300" cy="75" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:LOOPS+'<rect x="380" y="164" width="6" height="12" rx="1" fill="none" stroke="var(--line)" stroke-width="1.4"/>'},
+  logo:{front:null,back:[230,120,14]},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 42 (M = 32 IN)"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 104 · INSEAM 81",v:true},{x1:204,y1:620,x2:284,y2:620,t:"HEM 19",small:true}],
+        back:[{x1:430,y1:250,x2:430,y2:600,t:"INSEAM 32 IN",v:true}]},
+  callouts:{front:[C(300,75,"1"),C(198,140,"2"),C(312,190,"3"),C(244,400,"4")],back:[C(386,170,"5"),C(230,100,"6"),C(300,84,"7")]}
+};
+const SHO="M196 60 L404 60 L410 90 Q420 200 418 300 L414 430 L312 430 L304 250 L296 250 L288 430 L186 430 L182 300 Q180 200 190 90 Z";
+const SH={
+  outline:{front:SHO,back:SHO},
+  solid:{front:[...WB,"M206 92 Q220 150 190 172","M394 92 Q380 150 410 172"],back:[...WB,"M190 118 Q300 146 410 118","M300 60 L300 250","M214 170 L276 170","M324 170 L386 170"]},
+  dashed:{front:["M312 90 L312 210 Q312 232 300 242","M190 418 L288 418","M312 418 L412 418","M196 84 L404 84"],back:["M190 418 L288 418","M312 418 L412 418","M196 84 L404 84"]},
+  extra:{front:LOOPS+'<circle cx="300" cy="75" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/><rect x="198" y="112" width="12" height="22" rx="4" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:LOOPS+'<rect x="380" y="164" width="6" height="12" rx="1" fill="none" stroke="var(--line)" stroke-width="1.4"/>'},
+  logo:{front:[372,390,15],back:[230,120,14]},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 42"},{x1:548,y1:250,x2:548,y2:430,t:"INSEAM 9 IN",v:true},{x1:548,y1:60,x2:548,y2:240,t:"RISE 28",v:true,small:true}],back:[]},
+  callouts:{front:[C(204,100,"1"),C(198,170,"2"),C(372,370,"3")],back:[C(386,170,"4"),C(300,84,"5")]}
+};
+const JGO="M196 60 L404 60 L408 96 Q418 200 412 300 L380 556 L320 556 L304 250 L296 250 L280 556 L220 556 L188 300 Q182 200 192 96 Z";
+const gathers=Array.from({length:21},(_,i)=>`M${200+i*10} 64 L${200+i*10} 92`);
+const JG={
+  outline:{front:JGO,back:JGO},
+  solid:{front:["M192 96 L408 96","M220 556 L222 600 L278 600 L280 556","M320 556 L322 600 L378 600 L380 556","M290 96 L284 150","M310 96 L316 150"],back:["M192 96 L408 96","M220 556 L222 600 L278 600 L280 556","M320 556 L322 600 L378 600 L380 556","M300 96 L300 250","M324 170 L386 170"]},
+  dashed:{front:["M206 98 Q220 150 194 168","M394 98 Q380 150 406 168",...gathers],back:gathers},
+  extra:{front:'<path d="M190 100 Q184 200 190 300 L222 552" fill="none" stroke="var(--line)" stroke-width="3.5" opacity=".85"/><path d="M410 100 Q416 200 410 300 L378 552" fill="none" stroke="var(--line)" stroke-width="3.5" opacity=".85"/>',back:'<rect x="380" y="164" width="6" height="12" rx="1" fill="none" stroke="var(--line)" stroke-width="1.4"/>'},
+  logo:{front:[370,180,15],back:null},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 38 RELAXED"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 100",v:true},{x1:222,y1:620,x2:278,y2:620,t:"CUFF 13",small:true}],back:[]},
+  callouts:{front:[C(300,78,"1"),C(300,160,"2"),C(196,240,"3"),C(370,160,"4"),C(250,580,"5")],back:[C(386,170,"6")]}
+};
+const PLO="M196 60 L404 60 L412 90 Q432 220 430 320 L436 600 L316 600 L304 262 L296 262 L284 600 L164 600 L170 320 Q168 220 188 90 Z";
+const PL={
+  outline:{front:PLO,back:PLO},
+  solid:{front:[...WB,"M250 90 L254 168","M350 90 L346 168","M206 92 Q222 150 186 176","M394 92 Q378 150 414 176","M404 66 L436 66 L436 84 L404 84"],back:[...WB,"M300 60 L300 262","M222 168 L282 168","M318 168 L378 168"]},
+  dashed:{front:["M312 90 L312 214 Q312 236 300 246","M226 100 L224 596","M374 100 L376 596","M196 84 L404 84"],back:["M196 84 L404 84","M232 100 L236 160","M368 100 L364 160"]},
+  extra:{front:'<circle cx="426" cy="75" r="4" fill="none" stroke="var(--line)" stroke-width="1.4"/>',back:''},
+  logo:{front:null,back:[230,128,14]},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 42"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 104",v:true},{x1:164,y1:620,x2:284,y2:620,t:"HEM 29 WIDE",small:true}],back:[]},
+  callouts:{front:[C(250,130,"1"),C(420,48,"2"),C(226,400,"3")],back:[C(230,110,"4")]}
+};
+/* headwear & accessories */
+const CAPF="M150 400 Q150 196 300 188 Q450 196 450 400 Z";
+const CAP={
+  outline:{front:CAPF,back:"M170 404 Q176 214 330 206 Q452 214 456 404 Z"},
+  solid:{front:["M300 188 L300 400","M222 210 Q200 300 206 400","M378 210 Q400 300 394 400","M150 400 Q300 520 450 400","M150 400 Q300 436 450 400"],
+         back:["M170 404 Q100 410 54 448 Q130 444 210 424","M300 208 Q296 300 302 404","M412 224 Q440 300 446 404"]},
+  dashed:{front:["M164 410 Q300 500 436 410","M172 404 Q300 488 428 404","M152 380 Q300 410 448 380"],back:["M66 446 Q130 440 200 422","M172 384 Q300 400 454 384"]},
+  extra:{front:'<circle cx="300" cy="190" r="7" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="240" cy="246" r="3" fill="none" stroke="var(--line)" stroke-width="1.2"/><circle cx="360" cy="246" r="3" fill="none" stroke="var(--line)" stroke-width="1.2"/>',
+         back:'<rect x="430" y="370" width="30" height="12" fill="none" stroke="var(--line)" stroke-width="1.6"/><path d="M444 382 L452 420" stroke="var(--line)" stroke-width="2"/>'},
+  logo:{front:[300,318,82],back:null},
+  dims:{front:[{x1:150,y1:150,x2:450,y2:150,t:"CROWN WIDTH 20 · 6 PANEL"},{x1:500,y1:188,x2:500,y2:400,t:"CROWN 10.5 LOW",v:true}],back:[{x1:54,y1:480,x2:210,y2:480,t:"BRIM 7"}]},
+  callouts:{front:[C(300,170,"1"),C(300,272,"2"),C(300,476,"3")],back:[C(445,350,"4"),C(120,470,"5")]}
+};
+const SNB={
+  outline:{front:"M150 400 Q150 186 300 178 Q450 186 450 400 Z",back:"M150 400 Q150 186 300 178 Q450 186 450 400 Z"},
+  solid:{front:["M212 200 Q194 300 200 400","M388 200 Q406 300 400 400","M140 400 L460 400 L470 470 L130 470 Z"],
+         back:["M300 178 L300 400","M212 200 Q194 300 200 400","M388 200 Q406 300 400 400","M246 400 Q300 330 354 400"]},
+  dashed:{front:["M146 412 L454 412","M142 424 L458 424","M200 230 L400 230"],back:[]},
+  extra:{front:'<g fill="var(--line)" opacity=".8">'+Array.from({length:24},(_,i)=>`<circle cx="${168+(i%4)*8}" cy="${260+Math.floor(i/4)*16}" r="1.6"/><circle cx="${408+(i%4)*8}" cy="${260+Math.floor(i/4)*16}" r="1.6"/>`).join("")+'</g>',
+         back:'<rect x="230" y="372" width="140" height="18" fill="none" stroke="var(--line)" stroke-width="1.6"/>'+Array.from({length:7},(_,i)=>`<circle cx="${244+i*18}" cy="381" r="3.5" fill="none" stroke="var(--line)" stroke-width="1.2"/>`).join("")},
+  logo:{front:[300,300,74],back:null},
+  dims:{front:[{x1:130,y1:500,x2:470,y2:500,t:"FLAT BRIM 7.5"},{x1:500,y1:178,x2:500,y2:400,t:"CROWN 12 STRUCTURED",v:true}],back:[{x1:230,y1:420,x2:370,y2:420,t:"SNAP STRAP 7 POSITIONS"}]},
+  callouts:{front:[C(300,200,"1"),C(180,240,"2"),C(300,440,"3")],back:[C(300,350,"4")]}
+};
+const BKF="M200 300 L220 196 Q300 182 380 196 L400 300 Z";
+const BK={
+  outline:{front:BKF,back:BKF},
+  solid:{front:["M200 300 L116 372 Q300 410 484 372 L400 300","M200 300 Q300 312 400 300"],back:["M200 300 L116 372 Q300 410 484 372 L400 300","M200 300 Q300 312 400 300","M300 186 L300 304"]},
+  dashed:{front:["M132 364 Q300 398 468 364","M150 352 Q300 386 450 352","M168 340 Q300 372 432 340","M296 380 L292 460","M304 380 L308 460"],back:["M132 364 Q300 398 468 364","M150 352 Q300 386 450 352"]},
+  extra:{front:'<circle cx="236" cy="232" r="5" fill="none" stroke="var(--line)" stroke-width="1.4"/><circle cx="364" cy="232" r="5" fill="none" stroke="var(--line)" stroke-width="1.4"/><rect x="290" y="458" width="20" height="14" rx="4" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:''},
+  logo:{front:[300,252,56],back:null},
+  dims:{front:[{x1:116,y1:420,x2:484,y2:420,t:"BRIM 6 ALL ROUND"},{x1:500,y1:190,x2:500,y2:300,t:"CROWN 9",v:true}],back:[]},
+  callouts:{front:[C(236,212,"1"),C(300,226,"2"),C(150,330,"3"),C(318,466,"4")],back:[]}
+};
+const BNO="M200 430 L200 270 Q200 160 300 150 Q400 160 400 270 L400 430 Z";
+const BN={
+  outline:{front:BNO,back:BNO},
+  solid:{front:["M200 340 L400 340"],back:["M200 340 L400 340"]},
+  dashed:{front:Array.from({length:19},(_,i)=>`M${210+i*10} 344 L${210+i*10} 426`),back:Array.from({length:19},(_,i)=>`M${210+i*10} 344 L${210+i*10} 426`)},
+  extra:{front:'<rect x="200" y="372" width="200" height="12" fill="var(--line)" opacity=".85"/><rect x="282" y="390" width="36" height="28" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="1.4"/>',back:'<rect x="200" y="372" width="200" height="12" fill="var(--line)" opacity=".85"/>'},
+  logo:{front:[300,404,18],back:null},
+  dims:{front:[{x1:200,y1:460,x2:400,y2:460,t:"FLAT WIDTH 21"},{x1:440,y1:150,x2:440,y2:430,t:"HEIGHT 23 · CUFF 9",v:true}],back:[]},
+  callouts:{front:[C(300,130,"1"),C(420,378,"2"),C(340,404,"3")],back:[]}
+};
+const GLO="M230 600 L226 360 L212 222 Q212 200 230 200 Q248 200 250 222 L258 340 L264 178 Q266 156 284 156 Q302 156 302 178 L306 330 L316 168 Q318 148 336 148 Q354 148 354 170 L352 330 L366 202 Q368 184 386 186 Q402 188 400 208 L390 370 Q420 336 448 324 Q470 318 474 336 Q472 352 444 384 L404 470 L394 600 Z";
+const GL={
+  outline:{front:GLO,back:GLO},
+  solid:{front:["M230 470 L398 470"],back:["M230 470 L398 470"]},
+  dashed:{front:["M246 300 L266 290 L286 300 L306 290 L326 300 L346 290 L366 300 L386 292","M232 590 L392 590"],back:["M232 590 L392 590","M250 380 Q300 420 380 390"]},
+  extra:{front:'<circle cx="300" cy="530" r="44" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="2"/><circle cx="300" cy="530" r="36" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/><g fill="var(--line)" opacity=".8">'+[[231,240],[231,256],[231,272],[283,210],[283,226],[283,242],[335,200],[335,216],[335,232],[383,236],[383,252],[383,268]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.8"/>`).join("")+'</g>',
+         back:'<g fill="var(--line)" opacity=".8">'+[[231,240],[231,256],[283,210],[283,226],[335,200],[335,216],[383,236],[383,252]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.8"/>`).join("")+'</g>'},
+  logo:{front:[300,530,40],back:null},
+  dims:{front:[{x1:510,y1:148,x2:510,y2:600,t:"LENGTH 25 (SIZE M)",v:true}],back:[]},
+  callouts:{front:[C(306,282,"1"),C(356,530,"2"),C(300,450,"3")],back:[C(300,398,"4")]}
+};
+const TWO="M200 80 L400 80 L400 580 L200 580 Z";
+const TW={
+  outline:{front:TWO,back:TWO},
+  solid:{front:["M300 80 L300 124"],back:["M300 80 L300 124"]},
+  dashed:{front:["M208 88 L392 88 L392 572 L208 572 Z"],back:["M208 88 L392 88 L392 572 L208 572 Z"]},
+  extra:{front:'<rect x="200" y="80" width="200" height="500" fill="url(#openknit)"/><rect x="200" y="98" width="200" height="10" fill="var(--line)" opacity=".85"/><rect x="200" y="552" width="200" height="10" fill="var(--line)" opacity=".85"/><ellipse cx="300" cy="60" rx="12" ry="22" fill="none" stroke="var(--line)" stroke-width="2.4"/>',
+         back:'<rect x="200" y="80" width="200" height="500" fill="url(#openknit)"/><rect x="200" y="98" width="200" height="10" fill="var(--line)" opacity=".85"/><rect x="200" y="552" width="200" height="10" fill="var(--line)" opacity=".85"/>'},
+  logo:{front:[300,508,50],back:null},
+  dims:{front:[{x1:200,y1:610,x2:400,y2:610,t:"WIDTH 40"},{x1:440,y1:80,x2:440,y2:580,t:"LENGTH 100",v:true}],back:[]},
+  callouts:{front:[C(320,60,"1"),C(300,140,"2"),C(420,103,"3"),C(340,508,"4")],back:[]}
+};
+const SKO="M240 100 L340 100 L340 400 Q342 470 400 500 L480 530 Q512 546 502 576 Q492 600 452 596 L310 580 Q250 570 242 520 Z";
+const SK={
+  outline:{front:SKO,back:SKO},
+  solid:{front:["M240 170 L340 170"],back:["M240 170 L340 170"]},
+  dashed:{front:[...Array.from({length:9},(_,i)=>`M${250+i*10} 104 L${250+i*10} 166`),"M244 500 Q270 470 300 470","M440 512 Q460 560 450 592"],back:["M248 300 L332 300 L332 560 L260 556 Z","M244 500 Q270 470 300 470"]},
+  extra:{front:'<rect x="240" y="120" width="100" height="8" fill="var(--line)" opacity=".85"/><rect x="240" y="138" width="100" height="8" fill="var(--line)" opacity=".85"/>',back:'<rect x="240" y="120" width="100" height="8" fill="var(--line)" opacity=".85"/><rect x="240" y="138" width="100" height="8" fill="var(--line)" opacity=".85"/><rect x="250" y="320" width="80" height="230" fill="url(#mesh)"/>'},
+  logo:{front:[300,330,36],back:null},
+  dims:{front:[{x1:200,y1:100,x2:200,y2:520,t:"LEG 22 · CREW",v:true}],back:[]},
+  callouts:{front:[C(360,132,"1"),C(300,300,"2"),C(270,480,"3")],back:[C(290,430,"4")]}
+};
+const hc=(cx,w,h)=>`M${cx-w/2} 600 L${cx-w/2} ${600-h*.55} Q${cx-w/2} ${600-h} ${cx} ${600-h} Q${cx+w/2} ${600-h} ${cx+w/2} ${600-h*.55} L${cx+w/2} 600 Z`;
+const HCD=hc(140,170,430)+" "+hc(318,140,350)+" "+hc(472,118,300);
+const HC={
+  outline:{front:HCD,back:HCD},
+  solid:{front:["M56 588 L224 588","M248 588 L388 588","M413 588 L531 588"],back:["M56 588 L224 588","M248 588 L388 588","M413 588 L531 588","M140 170 L140 588","M318 250 L318 588","M472 300 L472 588"]},
+  dashed:{front:[hc(140,154,414),hc(318,124,334),hc(472,102,284)],back:[]},
+  extra:{front:[[140,170,"1"],[318,250,"3"],[472,300,"H"]].map(([x,y,t])=>`<rect x="${x-12}" y="${y-28}" width="24" height="20" rx="3" fill="none" stroke="var(--line)" stroke-width="1.4"/><text x="${x}" y="${y-13}" fill="var(--line)" font-family="var(--mono)" font-size="12" text-anchor="middle">${t}</text>`).join(""),back:''},
+  logo:{front:null,back:null},
+  dims:{front:[{x1:56,y1:630,x2:224,y2:630,t:"DRIVER 16 × 43",small:true},{x1:248,y1:630,x2:388,y2:630,t:"FW 13 × 35",small:true},{x1:413,y1:630,x2:531,y2:630,t:"HYB 11 × 30",small:true}],back:[]},
+  callouts:{front:[C(140,140,"1"),C(60,400,"2"),C(318,440,"3")],back:[C(140,400,"4")]}
+};
+HC.extra.front+=['<use href="#logo" fill="var(--line)" transform="translate(95 330) scale(.35)"/>','<use href="#logo" fill="var(--line)" transform="translate(283 390) scale(.27)"/>','<use href="#logo" fill="var(--line)" transform="translate(442 430) scale(.23)"/>'].join("");
+const BGO="M220 130 L380 130 L394 600 L206 600 Z";
+const BG={
+  outline:{front:BGO,back:BGO},
+  solid:{front:["M206 92 L394 92 L384 140 L216 140 Z","M232 300 L368 300 L374 530 L226 530 Z","M226 200 L150 640","M374 200 L450 640","M206 600 Q300 620 394 600"],
+         back:["M206 92 L394 92 L384 140 L216 140 Z","M246 150 Q196 300 250 440","M354 150 Q404 300 350 440","M270 150 Q226 300 270 440","M330 150 Q374 300 330 440","M226 200 L150 640","M374 200 L450 640"]},
+  dashed:{front:["M240 310 L360 310","M380 200 L390 480","M300 92 L300 140","M228 92 L236 140","M372 92 L364 140"],back:["M300 92 L300 140"]},
+  extra:{front:'<g stroke="var(--line)" stroke-width="5" opacity=".85"><path d="M178 480 L170 528"/><path d="M422 480 L430 528"/></g><rect x="380" y="180" width="16" height="70" rx="3" fill="none" stroke="var(--line)" stroke-width="1.4"/>',back:'<g stroke="var(--line)" stroke-width="5" opacity=".85"><path d="M178 480 L170 528"/><path d="M422 480 L430 528"/></g>'},
+  logo:{front:[300,412,110],back:null},
+  dims:{front:[{x1:206,y1:70,x2:394,y2:70,t:"TOP 23 · 14-WAY"},{x1:470,y1:92,x2:470,y2:600,t:"HEIGHT 89 · 2.2 KG",v:true}],back:[]},
+  callouts:{front:[C(300,116,"1"),C(300,320,"2"),C(388,215,"3"),C(174,504,"4")],back:[C(220,300,"5")]}
+};
 const SHEETS=[
   {id:"sg-pol-01",colors:"Black · White · Stone · Fog",x:0,y:0,style:"SG-POL-01",name:"Tour Polo",rev:"B",fabric:"180 gsm stretch pique, 88/12 rPET/elastane",size:"M (sample)",g:POLO,
    items:["Self-fabric knit collar with 3 mm stripe tipping","Wave-S logo, tonal embroidery, 50 mm, left chest","3-button placket 30 x 115 mm, matte horn buttons","Rib sleeve cuff 25 mm with stripe tipping","Straight hem 20 mm coverstitch, 30 mm side vents","Back yoke with centre box pleat for swing room","Back hem 2 cm longer than front; UPF 50, wicking"]},
@@ -364,6 +508,32 @@ const SHEETS=[
    items:["Stand collar, 40 mm","Two-way reversible zip","Welt hand pockets on both faces","Wave-S logo on quilted face; flat face carries it too","Wave-pattern quilting, 9 cm repeat"]},
   {id:"sg-jk-01",x:7600,y:2240,style:"SG-JK-01",name:"Weather Shell Jacket",rev:"A",fabric:"2.5-layer stretch shell, 20K/20K, taped",colors:"Black · Stone",size:"M (sample)",g:JK,
    items:["Tall collar; hood stows inside","Waterproof chest zip pocket (phone)","Waterproof hand pocket zips","Wave-S logo, reflective print, 50 mm, left chest","Back yoke vent with storm flap","Articulated elbows; quiet fabric, no rustle in the swing"]}
+  ,{id:"sg-tr-01",x:0,y:3360,style:"SG-TR-01",name:"Tour Trouser",rev:"A",fabric:"220 gsm 4-way stretch twill, DWR",colors:"Stone · Black · Fog Grey",size:"M (sample)",g:TR,
+   items:["Extended waistband with button and hidden hook","Slash front pockets, deep for balls and tees","Fly with YKK zip","Pressed crease, tapered leg","Zipped back pocket for phone (right)","Small wave-S embroidery above left back pocket","Silicone gripper and stripe tape inside waistband"]}
+  ,{id:"sg-sh-01",x:1520,y:3360,style:"SG-SH-01",name:"Tour Short",rev:"A",fabric:"Same twill as Tour Trouser",colors:"Stone · Black · White",size:"M (sample)",g:SH,
+   items:["Tee loop on right front pocket","Slash pockets, ball-safe depth","Wave-S embroidery 35 mm at left hem","Zipped back pocket for phone","Silicone waist gripper with stripe tape"]}
+  ,{id:"sg-jg-01",x:3040,y:3360,style:"SG-JG-01",name:"Clubhouse Jogger",rev:"A",fabric:"280 gsm double-knit stretch",colors:"Black · Fog Grey",size:"M (sample)",g:JG,
+   items:["Elastic waist, gathered, inner drawcord","Flat drawcords, metal tips","5 mm stripe piping down each side seam","Wave-S embroidery 35 mm, left thigh","Rib cuffs 13 cm","Zipped back pocket"]}
+  ,{id:"sg-pl-01",x:4560,y:3360,style:"SG-PL-01",name:"Pleated Wide Trouser",rev:"A",fabric:"260 gsm Tencel-blend twill",colors:"Stone · Deep Navy · Black",size:"M (sample)",g:PL,
+   items:["Single forward pleat each side","Extended tab waist with button","Pressed crease, wide straight leg","Wave-S embroidery above left back pocket"]}
+  ,{id:"sg-cp-01",x:0,y:4480,style:"SG-CP-01",name:"Unstructured Cap",rev:"A",fabric:"Washed cotton twill",colors:"Stone · Black · White · Green",size:"M (sample)",g:CAP,labels:["FRONT VIEW","SIDE VIEW"],
+   items:["Self-fabric top button","3D puff wave-S, 55 mm, front","Curved brim with stripe binding at edge","Strap-back with metal slider","Brim 7 cm, low 10.5 cm crown"]}
+  ,{id:"sg-cp-02",x:1520,y:4480,style:"SG-CP-02",name:"Tour Snapback",rev:"A",fabric:"Performance poly, perforated sides",colors:"Black · White",size:"M (sample)",g:SNB,labels:["FRONT VIEW","BACK VIEW"],
+   items:["Structured 5-panel front, no centre seam","Laser-perforated side panels","Flat brim with stripe stitch rows","Snap strap, 7 positions"]}
+  ,{id:"sg-bk-01",x:3040,y:4480,style:"SG-BK-01",name:"Bucket Hat",rev:"A",fabric:"Ripstop nylon, DWR, UPF 50",colors:"Stone · Black",size:"M (sample)",g:BK,
+   items:["Metal eyelet vents","Wave-S embroidery, 40 mm","Stripe stitching rows on 6 cm brim","Chin cord with toggle; packable"]}
+  ,{id:"sg-bn-01",x:4560,y:4480,style:"SG-BN-01",name:"Stripe Beanie",rev:"A",fabric:"Merino blend rib knit",colors:"Black/Stone · Fog/White",size:"M (sample)",g:BN,
+   items:["Rounded crown, fine rib","Knitted stripe band in cuff","Woven wave-S label on cuff"]}
+  ,{id:"sg-gl-01",x:6080,y:4480,style:"SG-GL-01",name:"Cabretta Glove",rev:"A",fabric:"AAA cabretta palm, Lycra knuckles",colors:"White · Black",size:"M (sample)",g:GL,labels:["BACK OF HAND","PALM"],
+   items:["Stretch knuckle band","Round tab with magnetic ball marker printed with wave-S","Stripe perforation rows on fingers","Palm patch reinforced (palm view)"]}
+  ,{id:"sg-tw-01",x:7600,y:4480,style:"SG-TW-01",name:"Waffle Caddy Towel",rev:"A",fabric:"Cotton waffle weave, 40 × 100 cm",colors:"Black · Stone",size:"M (sample)",g:TW,labels:["FLAT FRONT","FLAT BACK"],
+   items:["Metal carabiner clip","Centre slit to hang from bag","Woven stripe borders at both ends","White embroidered wave-S near hem"]}
+  ,{id:"sg-sk-01",x:9120,y:4480,style:"SG-SK-01",name:"Stripe Crew Sock",rev:"A",fabric:"Combed cotton/nylon, cushioned sole",colors:"White · Black · Stone (3-pack)",size:"M (sample)",g:SK,labels:["OUTER SIDE","INNER SIDE"],
+   items:["Rib cuff with two knitted stripes","Knitted wave-S at ankle","Reinforced Y-heel and toe","Cushioned blister zone (inner view)"]}
+  ,{id:"sg-hc-01",x:10640,y:4480,style:"SG-HC-01",name:"Headcover Set",rev:"A",fabric:"Off-white PU leather, fleece-lined",colors:"Off-White/Black · Black/Stone",size:"M (sample)",g:HC,
+   items:["Number tags: 1, 3, H","Black piping stripe down both sides","Large embroidered wave-S on each cover","Centre back seam"]}
+  ,{id:"sg-bg-01",x:12160,y:4480,style:"SG-BG-01",name:"Stand Bag",rev:"A",fabric:"Matte recycled nylon ripstop, 2.2 kg",colors:"Black · Stone",size:"M (sample)",g:BG,
+   items:["14-way top with full-length dividers","Main pocket with large white wave-S","Magnetic rangefinder pocket","Reflective stripe tape on stand legs","Dual carry straps (back view)"]}
 ];
 
 const CSSV=getComputedStyle(document.documentElement);
@@ -396,8 +566,8 @@ function sheetSVG(sh){
   const W=1400,H=900;
   let s=`<rect width="${W}" height="${H}" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="2"/>`;
   s+=`<rect x="16" y="16" width="${W-32}" height="${H-32}" fill="none" stroke="var(--line)" stroke-width="1" opacity=".6"/>`;
-  s+=`<g transform="translate(24 44) scale(.9)">${view(sh.g,"front")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">FRONT VIEW</text></g>`;
-  s+=`<g transform="translate(556 44) scale(.9)">${view(sh.g,"back")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">BACK VIEW</text></g>`;
+  s+=`<g transform="translate(24 44) scale(.9)">${view(sh.g,"front")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">${(sh.labels||[])[0]||"FRONT VIEW"}</text></g>`;
+  s+=`<g transform="translate(556 44) scale(.9)">${view(sh.g,"back")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">${(sh.labels||[])[1]||"BACK VIEW"}</text></g>`;
   // title block
   const tx=W-436,ty=H-236;
   s+=`<g transform="translate(${tx} ${ty})" font-family="var(--mono)">
@@ -410,7 +580,7 @@ function sheetSVG(sh){
     <text x="64" y="32" fill="var(--line)" font-family="var(--display)" font-weight="700" font-size="22" letter-spacing="3">STRIPPED GOLF</text>
     <text x="64" y="52" fill="var(--dim)" font-size="11" letter-spacing="1">TECHNICAL FLAT · NOT TO SCALE · CM</text>
     <text x="16" y="88" fill="var(--dim)" font-size="10" letter-spacing="1">STYLE</text>
-    <text x="16" y="110" fill="var(--line)" font-family="var(--display)" font-weight="600" font-size="${(sh.style+sh.name).length>26?17:22}" letter-spacing="1">${sh.style} · ${sh.name.toUpperCase()}</text>
+    <text x="16" y="110" fill="var(--line)" font-family="var(--display)" font-weight="600" font-size="${(sh.style+sh.name).length>23?17:22}" letter-spacing="1">${sh.style} · ${sh.name.toUpperCase()}</text>
     <text x="16" y="142" fill="var(--dim)" font-size="10" letter-spacing="1">SIZE</text><text x="16" y="162" fill="var(--line)" font-size="13">${sh.size}</text>
     <text x="226" y="142" fill="var(--dim)" font-size="10" letter-spacing="1">REV / DATE</text><text x="226" y="162" fill="var(--line)" font-size="13">${sh.rev} · 2026-10-08</text>
     <text x="16" y="190" fill="var(--dim)" font-size="10" letter-spacing="1">FABRIC</text><text x="16" y="208" fill="var(--line)" font-size="10.5">${sh.fabric.length>30?sh.fabric.slice(0,30)+"…":sh.fabric}</text>
@@ -436,12 +606,12 @@ SHEETS.forEach(sh=>{
   const g=el("g",{transform:`translate(${sh.x} ${sh.y})`,"data-id":sh.id,tabindex:"0",role:"button","aria-label":`${sh.style} ${sh.name} sheet`,style:"cursor:pointer"},sheetSVG(sh));
   sh.node=g;world.appendChild(g);
 });
-world.appendChild(el("g",{transform:"translate(6080 1120)"},ghostSVG()));
-[["POLOS · 5 STYLES",0,-30],["KNITWEAR · 4 STYLES",0,1090],["LAYERS & OUTERWEAR · 6 STYLES",0,2210]].forEach(([t,x,y])=>world.appendChild(el("text",{x,y,fill:"var(--dim)","font-family":"var(--display)","font-weight":"600","font-size":"34","letter-spacing":"6"},t)));
+world.appendChild(el("g",{transform:"translate(6080 3360)"},ghostSVG()));
+[["POLOS · 5 STYLES",0,-30],["KNITWEAR · 4 STYLES",0,1090],["LAYERS & OUTERWEAR · 6 STYLES",0,2210],["BOTTOMS · 4 STYLES",0,3330],["HEADWEAR & ACCESSORIES · 9 STYLES",0,4450]].forEach(([t,x,y])=>world.appendChild(el("text",{x,y,fill:"var(--dim)","font-family":"var(--display)","font-weight":"600","font-size":"34","letter-spacing":"6"},t)));
 
 /* ---------- pan / zoom via viewBox ---------- */
 let vb={x:-200,y:-200,w:8000,h:2400};
-const BOUNDS={x:-80,y:-90,w:9160,h:3260};
+const BOUNDS={x:-80,y:-90,w:13720,h:5500};
 function apply(){
   board.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   const r=board.getBoundingClientRect();
