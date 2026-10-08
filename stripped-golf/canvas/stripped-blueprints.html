@@ -1,0 +1,314 @@
+<title>STRIPPED Golf Blueprints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one full-screen drafting board you pan and zoom; sheets sit on it like pinned drawings, chrome floats at the edges. Single deliberate dark blueprint look. */
+:root{
+  --paper:#0e3561;      /* blueprint ground */
+  --paper-deep:#0a2848; /* sheet ground */
+  --grid:rgba(160,205,255,.10);
+  --grid-major:rgba(160,205,255,.20);
+  --line:#eaf3ff;       /* drawn line */
+  --cyan:#8fd0ff;       /* dimensions and callouts */
+  --dim:#9cb8d8;        /* secondary text */
+  --chrome:rgba(8,30,56,.92);
+  --chrome-line:rgba(160,205,255,.28);
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--paper);color:var(--line);font-family:var(--mono);overflow:hidden;margin:0}
+#board{position:fixed;inset:0;touch-action:none;cursor:grab;display:block;width:100%;height:100%}
+#board.dragging{cursor:grabbing}
+.chrome{position:fixed;background:var(--chrome);border:1px solid var(--chrome-line);border-radius:4px;backdrop-filter:blur(6px)}
+#brand{top:calc(12px + env(safe-area-inset-top,0px));left:16px;display:flex;align-items:center;gap:10px;padding:8px 12px}
+#brand svg{width:22px;height:22px;display:block}
+#brand b{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.14em}
+#brand span{color:var(--dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#tools{bottom:calc(12px + env(safe-area-inset-bottom,0px));left:16px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px;max-width:calc(100% - 32px)}
+button{font:500 12px var(--mono);color:var(--line);background:transparent;border:1px solid var(--chrome-line);border-radius:3px;padding:6px 10px;cursor:pointer;letter-spacing:.04em}
+button:hover{border-color:var(--cyan);color:var(--cyan)}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--cyan);color:var(--paper-deep);border-color:var(--cyan)}
+#zoomval{min-width:48px;text-align:center;color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+.sep{width:1px;height:20px;background:var(--chrome-line)}
+#panel{top:calc(12px + env(safe-area-inset-top,0px));right:16px;width:300px;max-width:calc(100% - 32px);padding:12px;display:flex;flex-direction:column;gap:10px}
+#panel h2{margin:0;font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:.06em;text-wrap:balance}
+#panel .meta{color:var(--dim);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+#panel ol{margin:0;padding-left:20px;font-size:12px;line-height:1.55;color:var(--line)}
+#panel label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+#notes{width:100%;box-sizing:border-box;min-height:84px;resize:vertical;background:var(--paper-deep);color:var(--line);border:1px solid var(--chrome-line);border-radius:3px;font:12px/1.5 var(--mono);padding:8px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+#status{font-size:11px;color:var(--cyan);min-height:14px}
+#hint{color:var(--dim);font-size:11px;line-height:1.5}
+@media (max-width:640px){
+  #panel{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));right:16px;left:16px;width:auto;max-height:42vh;overflow:auto}
+  #brand span{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg id="board" role="img" aria-label="Blueprint board with STRIPPED Golf garment spec sheets">
+  <defs>
+    <pattern id="gMinor" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--grid)" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern>
+    <pattern id="gMajor" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="url(#gMinor)"/><path d="M100 0H0V100" fill="none" stroke="var(--grid-major)" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L10 5L0 9Z" fill="var(--cyan)"/></marker>
+    <path id="logo" d="M 128 192 C 92.654 192 64 220.654 64 256 L 0 256 C 0 185.308 57.308 128 128 128 Z M 256 128 C 256 198.692 198.692 256 128 256 L 128 192 C 163.346 192 192 163.346 192 128 Z M 128 64 C 92.654 64 64 92.654 64 128 L 0 128 C 0 57.308 57.308 0 128 0 Z M 256 0 C 256 70.692 198.692 128 128 128 L 128 64 C 163.346 64 192 35.346 192 0 Z"/>
+  </defs>
+  <rect id="ground" x="-20000" y="-20000" width="40000" height="40000" fill="url(#gMajor)"/>
+  <g id="world"></g>
+</svg>
+
+<div id="brand" class="chrome">
+  <svg viewBox="0 0 256 256" aria-hidden="true"><use href="#logo" fill="var(--line)"/></svg>
+  <b>STRIPPED</b><span>Golf · Blueprint board</span>
+</div>
+
+<aside id="panel" class="chrome" aria-live="polite">
+  <div class="meta" id="pMeta"></div>
+  <h2 id="pTitle"></h2>
+  <ol id="pCallouts"></ol>
+  <label for="notes">Notes on this sheet</label>
+  <textarea id="notes" placeholder="Fabric, colourways, fit changes… saved in this browser"></textarea>
+  <div class="row">
+    <button id="copySvg" type="button">Copy sheet SVG</button>
+    <button id="focusBtn" type="button">Zoom to sheet</button>
+  </div>
+  <div id="status"></div>
+  <div id="hint">Drag to pan · scroll or pinch to zoom · click a sheet to select it.</div>
+</aside>
+
+<nav id="tools" class="chrome" aria-label="Board controls">
+  <button id="zOut" type="button" aria-label="Zoom out">−</button>
+  <span id="zoomval">100%</span>
+  <button id="zIn" type="button" aria-label="Zoom in">+</button>
+  <button id="fit" type="button">Fit all</button>
+  <span class="sep" aria-hidden="true"></span>
+  <span id="sheetBtns" class="row"></span>
+</nav>
+
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg";
+const world=document.getElementById("world");
+const board=document.getElementById("board");
+
+/* ---------- garment drawings (local 600 x 700 view space) ---------- */
+const POLO={
+  outline:{
+    front:"M250 92 L172 112 Q120 150 94 214 L140 244 Q160 226 188 208 L188 600 Q300 612 412 600 L412 208 Q440 226 460 244 L506 214 Q480 150 428 112 L350 92 Q300 128 250 92 Z",
+    back:"M250 92 L172 112 Q120 150 94 214 L140 244 Q160 226 188 208 L188 600 Q300 612 412 600 L412 208 Q440 226 460 244 L506 214 Q480 150 428 112 L350 92 Q300 100 250 92 Z"
+  },
+  solid:{
+    front:["M250 92 Q300 58 350 92","M250 92 L262 154 L298 120","M350 92 L338 154 L302 120","M103 200 L149 231","M497 200 L451 231"],
+    back:["M250 92 Q300 76 350 92","M178 140 Q300 156 422 140","M292 147 L296 172","M308 147 L304 172","M188 600 L196 570","M412 600 L404 570","M103 200 L149 231","M497 200 L451 231"]
+  },
+  dashed:{
+    front:["M172 112 Q186 160 188 208","M428 112 Q414 160 412 208","M108 193 L154 224","M492 193 L446 224","M188 588 Q300 600 412 588","M287 120 L287 236","M313 120 L313 236"],
+    back:["M172 112 Q186 160 188 208","M428 112 Q414 160 412 208","M108 193 L154 224","M492 193 L446 224","M196 588 Q300 600 404 588","M178 146 Q300 162 422 146"]
+  },
+  extra:{
+    front:'<rect x="287" y="120" width="26" height="116" fill="none" stroke="var(--line)" stroke-width="2"/><circle cx="300" cy="142" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="300" cy="174" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="300" cy="206" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',
+    back:''
+  },
+  logo:{front:[350,146,36],back:null},
+  dims:{
+    front:[{x1:188,y1:262,x2:412,y2:262,t:"½ CHEST 54"},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 74 (HPS)",v:true},{x1:94,y1:268,x2:140,y2:298,t:"SLV 23",small:true}],
+    back:[{x1:188,y1:640,x2:412,y2:640,t:"½ HEM 53"},{x1:250,y1:52,x2:350,y2:52,t:"NECK 18"}]
+  },
+  callouts:{
+    front:[[296,74,"1"],[350,128,"2"],[318,190,"3"],[120,212,"4"],[300,600,"5"]],
+    back:[[300,150,"6"],[190,584,"7"]]
+  }
+};
+const QZ={
+  outline:{
+    front:"M250 96 L172 116 Q140 150 128 220 L106 556 L156 566 L178 300 Q182 250 192 214 L192 596 L408 596 L408 214 Q418 250 422 300 L444 566 L494 556 L472 220 Q460 150 428 116 L350 96 Z",
+    back:"M250 96 L172 116 Q140 150 128 220 L106 556 L156 566 L178 300 Q182 250 192 214 L192 596 L408 596 L408 214 Q418 250 422 300 L444 566 L494 556 L472 220 Q460 150 428 116 L350 96 Z"
+  },
+  solid:{
+    front:["M250 96 L254 50 Q300 42 346 50 L350 96","M254 50 Q300 60 346 50","M192 570 L408 570","M109 520 L159 530","M491 520 L441 530","M296 48 L296 300","M304 48 L304 300","M296 300 L304 300"],
+    back:["M250 96 L254 54 Q300 48 346 54 L350 96","M254 54 Q300 64 346 54","M192 570 L408 570","M109 520 L159 530","M491 520 L441 530"]
+  },
+  dashed:{
+    front:["M172 116 Q186 166 192 214","M428 116 Q414 166 408 214","M300 52 L300 296","M192 582 L408 582"],
+    back:["M172 116 Q186 166 192 214","M428 116 Q414 166 408 214","M192 582 L408 582","M300 96 L300 570"]
+  },
+  extra:{
+    front:'<rect x="294" y="58" width="12" height="22" rx="2" fill="none" stroke="var(--line)" stroke-width="1.8"/>',
+    back:''
+  },
+  logo:{front:[348,150,36],back:null},
+  dims:{
+    front:[{x1:192,y1:300,x2:408,y2:300,t:"½ CHEST 57",above:true},{x1:548,y1:96,x2:548,y2:600,t:"BODY LENGTH 72 (HPS)",v:true},{x1:310,y1:48,x2:310,y2:300,t:"ZIP 25",v:true,small:true}],
+    back:[{x1:192,y1:640,x2:408,y2:640,t:"½ HEM 52"},{x1:52,y1:116,x2:52,y2:560,t:"SLV 64",v:true}]
+  },
+  callouts:{
+    front:[[300,30,"1"],[316,190,"2"],[348,130,"3"],[132,540,"4"],[300,580,"5"]],
+    back:[[300,330,"6"],[204,104,"7"]]
+  }
+};
+
+const SHEETS=[
+  {id:"sg-pol-01",x:0,y:0,style:"SG-POL-01",name:"Tour Polo",rev:"A",fabric:"180 gsm stretch piqué, 88/12 poly/elastane",size:"M (sample)",g:POLO,
+   items:["Self-fabric knit collar, 3-button placket","Wave-S logo, tonal embroidery, 50 mm, left chest","Placket 30 × 115 mm, horn-look buttons","Rib sleeve cuff, 25 mm, coverstitched","Straight hem, 20 mm coverstitch, 30 mm side vents","Back yoke with centre box pleat for swing room","Side vents bar-tacked at top"]},
+  {id:"sg-qz-01",x:1520,y:0,style:"SG-QZ-01",name:"Range Quarter-Zip",rev:"A",fabric:"260 gsm brushed-back jersey",size:"M (sample)",g:QZ,
+   items:["Mock-neck collar stand, 55 mm","Matte black coil zip, 250 mm, garage at top","Wave-S logo, tonal embroidery, 50 mm, left chest","Rib cuffs, 60 mm","Rib hem band, 50 mm","Centre back seam, flatlocked","Set-in sleeve, armhole flatlocked"]}
+];
+
+const CSSV=getComputedStyle(document.documentElement);
+function R(str){return str.replace(/var\(--([a-z-]+)\)/g,(m,n)=>CSSV.getPropertyValue("--"+n).trim()||m);}
+document.querySelectorAll("svg [fill^='var'],svg [stroke^='var']").forEach(n=>{["fill","stroke"].forEach(a=>{const v=n.getAttribute(a);if(v&&v.startsWith("var"))n.setAttribute(a,R(v));});});
+function el(tag,attrs,html){if(html!=null)html=R(html);const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(html!=null)e.innerHTML=html;return e;}
+
+function dimLine(d){
+  let s=`<line x1="${d.x1}" y1="${d.y1}" x2="${d.x2}" y2="${d.y2}" stroke="var(--cyan)" stroke-width="1.2" marker-start="url(#arr)" marker-end="url(#arr)"/>`;
+  const mx=(d.x1+d.x2)/2,my=(d.y1+d.y2)/2,fs=d.small?11:12;
+  if(d.v){s+=`<text x="${mx+8}" y="${my}" fill="var(--cyan)" font-family="var(--mono)" font-size="${fs}" transform="rotate(90 ${mx+8} ${my})" text-anchor="middle">${d.t}</text>`;}
+  else{const ty=d.above?my-8:my+16;s+=`<text x="${mx}" y="${ty}" fill="var(--cyan)" font-family="var(--mono)" font-size="${fs}" text-anchor="middle">${d.t}</text>`;}
+  return s;
+}
+function callout(c){
+  return `<g><circle cx="${c[0]}" cy="${c[1]}" r="10" fill="var(--paper-deep)" stroke="var(--cyan)" stroke-width="1.4"/><text x="${c[0]}" y="${c[1]+4}" fill="var(--cyan)" font-family="var(--mono)" font-size="11" font-weight="500" text-anchor="middle">${c[2]}</text></g>`;
+}
+function view(g,side){
+  let s=`<path d="${g.outline[side]}" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linejoin="round"/>`;
+  g.solid[side].forEach(p=>s+=`<path d="${p}" fill="none" stroke="var(--line)" stroke-width="1.8" stroke-linecap="round"/>`);
+  g.dashed[side].forEach(p=>s+=`<path d="${p}" fill="none" stroke="var(--line)" stroke-width="1.1" stroke-dasharray="5 4" opacity=".85"/>`);
+  s+=g.extra[side];
+  const L=g.logo[side];
+  if(L){const sc=L[2]/256;s+=`<use href="#logo" fill="var(--line)" transform="translate(${L[0]-L[2]/2} ${L[1]-L[2]/2}) scale(${sc})"/>`;}
+  g.dims[side].forEach(d=>s+=dimLine(d));
+  g.callouts[side].forEach(c=>s+=callout(c));
+  return s;
+}
+function sheetSVG(sh){
+  const W=1400,H=900;
+  let s=`<rect width="${W}" height="${H}" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="2"/>`;
+  s+=`<rect x="16" y="16" width="${W-32}" height="${H-32}" fill="none" stroke="var(--line)" stroke-width="1" opacity=".6"/>`;
+  s+=`<g transform="translate(40 60)">${view(sh.g,"front")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">FRONT VIEW</text></g>`;
+  s+=`<g transform="translate(640 60)">${view(sh.g,"back")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">BACK VIEW</text></g>`;
+  // title block
+  const tx=W-436,ty=H-236;
+  s+=`<g transform="translate(${tx} ${ty})" font-family="var(--mono)">
+    <rect width="420" height="220" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="0" y1="64" x2="420" y2="64" stroke="var(--line)" stroke-width="1"/>
+    <line x1="0" y1="124" x2="420" y2="124" stroke="var(--line)" stroke-width="1" opacity=".6"/>
+    <line x1="0" y1="172" x2="420" y2="172" stroke="var(--line)" stroke-width="1" opacity=".6"/>
+    <line x1="210" y1="124" x2="210" y2="220" stroke="var(--line)" stroke-width="1" opacity=".6"/>
+    <use href="#logo" fill="var(--line)" transform="translate(16 14) scale(${36/256})"/>
+    <text x="64" y="32" fill="var(--line)" font-family="var(--display)" font-weight="700" font-size="22" letter-spacing="3">STRIPPED GOLF</text>
+    <text x="64" y="52" fill="var(--dim)" font-size="11" letter-spacing="1">TECHNICAL FLAT · NOT TO SCALE · CM</text>
+    <text x="16" y="88" fill="var(--dim)" font-size="10" letter-spacing="1">STYLE</text>
+    <text x="16" y="110" fill="var(--line)" font-family="var(--display)" font-weight="600" font-size="22" letter-spacing="1">${sh.style} · ${sh.name.toUpperCase()}</text>
+    <text x="16" y="142" fill="var(--dim)" font-size="10" letter-spacing="1">SIZE</text><text x="16" y="162" fill="var(--line)" font-size="13">${sh.size}</text>
+    <text x="226" y="142" fill="var(--dim)" font-size="10" letter-spacing="1">REV / DATE</text><text x="226" y="162" fill="var(--line)" font-size="13">${sh.rev} · 2026-10-08</text>
+    <text x="16" y="190" fill="var(--dim)" font-size="10" letter-spacing="1">FABRIC</text><text x="16" y="208" fill="var(--line)" font-size="10.5">${sh.fabric.length>30?sh.fabric.slice(0,30)+"…":sh.fabric}</text>
+    <text x="226" y="190" fill="var(--dim)" font-size="10" letter-spacing="1">COLOURWAY</text><text x="226" y="208" fill="var(--line)" font-size="11">Black / White / Stone</text>
+  </g>`;
+  // legend
+  s+=`<g transform="translate(40 ${H-60})" font-family="var(--mono)" font-size="11" fill="var(--dim)">
+    <line x1="0" y1="0" x2="34" y2="0" stroke="var(--line)" stroke-width="2"/><text x="42" y="4">SEAM / EDGE</text>
+    <line x1="150" y1="0" x2="184" y2="0" stroke="var(--line)" stroke-width="1.1" stroke-dasharray="5 4"/><text x="192" y="4">TOPSTITCH</text>
+    <line x1="290" y1="0" x2="324" y2="0" stroke="var(--cyan)" stroke-width="1.2"/><text x="332" y="4">MEASUREMENT</text>
+  </g>`;
+  return s;
+}
+
+// ghost sheet: where the next design goes
+function ghostSVG(){
+  return `<rect width="1400" height="900" fill="none" stroke="var(--dim)" stroke-width="2" stroke-dasharray="14 10" opacity=".6"/>
+  <text x="700" y="430" fill="var(--dim)" font-family="var(--display)" font-weight="600" font-size="40" letter-spacing="4" text-anchor="middle">NEXT SHEET</text>
+  <text x="700" y="470" fill="var(--dim)" font-family="var(--mono)" font-size="15" text-anchor="middle">Describe a garment to Claude and it gets drafted here</text>`;
+}
+
+SHEETS.forEach(sh=>{
+  const g=el("g",{transform:`translate(${sh.x} ${sh.y})`,"data-id":sh.id,tabindex:"0",role:"button","aria-label":`${sh.style} ${sh.name} sheet`,style:"cursor:pointer"},sheetSVG(sh));
+  sh.node=g;world.appendChild(g);
+});
+world.appendChild(el("g",{transform:"translate(3040 0)"},ghostSVG()));
+
+/* ---------- pan / zoom via viewBox ---------- */
+let vb={x:-200,y:-200,w:4800,h:1400};
+const BOUNDS={x:-80,y:-80,w:4600,h:1060};
+function apply(){
+  board.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const r=board.getBoundingClientRect();
+  const z=Math.min(r.width/vb.w,r.height/vb.h);
+  document.getElementById("zoomval").textContent=Math.round(z*100)+"%";
+}
+function fitTo(b,pad){
+  const r=board.getBoundingClientRect();pad=pad||0.08;
+  const aspect=r.width/r.height;
+  let w=b.w*(1+pad*2),h=b.h*(1+pad*2);
+  if(w/h<aspect)w=h*aspect;else h=w/aspect;
+  vb={x:b.x+b.w/2-w/2,y:b.y+b.h/2-h/2,w,h};apply();
+}
+function toWorld(cx,cy){
+  const r=board.getBoundingClientRect();
+  const s=Math.max(vb.w/r.width,vb.h/r.height);
+  const ox=(r.width*s-vb.w)/2,oy=(r.height*s-vb.h)/2;
+  return {x:vb.x-ox+(cx-r.left)*s,y:vb.y-oy+(cy-r.top)*s,s};
+}
+function zoomAt(cx,cy,f){
+  const p=toWorld(cx,cy);
+  const nw=Math.min(Math.max(vb.w*f,300),40000);const k=nw/vb.w;
+  vb={x:p.x-(p.x-vb.x)*k,y:p.y-(p.y-vb.y)*k,w:nw,h:vb.h*k};apply();
+}
+board.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,Math.exp(e.deltaY*0.0015));},{passive:false});
+
+const ptrs=new Map();let moved=0,pinch=null;
+board.addEventListener("pointerdown",e=>{board.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;board.classList.add("dragging");
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)};}});
+board.addEventListener("pointermove",e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const prev=ptrs.get(e.pointerId);const cur={x:e.clientX,y:e.clientY};ptrs.set(e.pointerId,cur);
+  if(ptrs.size===2&&pinch){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>0){zoomAt((a.x+b.x)/2,(a.y+b.y)/2,pinch.d/d);pinch.d=d;}moved+=10;return;}
+  const s=toWorld(0,0).s;const dx=cur.x-prev.x,dy=cur.y-prev.y;moved+=Math.abs(dx)+Math.abs(dy);
+  vb.x-=dx*s;vb.y-=dy*s;apply();
+});
+function endPtr(e){
+  const wasClick=ptrs.size===1&&moved<5;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;
+  if(!ptrs.size)board.classList.remove("dragging");
+  if(wasClick&&e.type==="pointerup"){const t=document.elementFromPoint(e.clientX,e.clientY);const g=t&&t.closest&&t.closest("[data-id]");if(g)select(g.getAttribute("data-id"));}
+}
+board.addEventListener("pointerup",endPtr);board.addEventListener("pointercancel",endPtr);
+
+/* ---------- selection, notes, copy ---------- */
+let current=null;
+const btnWrap=document.getElementById("sheetBtns");
+SHEETS.forEach(sh=>{const b=document.createElement("button");b.type="button";b.textContent=sh.style;b.id="btn-"+sh.id;b.addEventListener("click",()=>{select(sh.id);focusSheet(sh);});btnWrap.appendChild(b);
+  sh.node.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(sh.id);focusSheet(sh);}});});
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(_){return null;}}
+function select(id){
+  const sh=SHEETS.find(s=>s.id===id);if(!sh)return;current=sh;
+  SHEETS.forEach(s=>{document.getElementById("btn-"+s.id).setAttribute("aria-pressed",s===sh?"true":"false");s.node.querySelector("rect").setAttribute("stroke",R(s===sh?"var(--cyan)":"var(--line)"));});
+  document.getElementById("pMeta").textContent=`${sh.style} · Rev ${sh.rev} · ${sh.size}`;
+  document.getElementById("pTitle").textContent=sh.name;
+  document.getElementById("pCallouts").innerHTML=sh.items.map(t=>`<li>${t}</li>`).join("");
+  document.getElementById("notes").value=store("notes:"+sh.id)||"";
+  document.getElementById("status").textContent="";
+  store("lastSheet",sh.id);
+}
+function focusSheet(sh){fitTo({x:sh.x,y:sh.y,w:1400,h:900},0.04);}
+document.getElementById("notes").addEventListener("input",e=>{if(current)store("notes:"+current.id,e.target.value);});
+document.getElementById("focusBtn").addEventListener("click",()=>current&&focusSheet(current));
+document.getElementById("copySvg").addEventListener("click",()=>{
+  if(!current)return;
+  const inner=current.node.innerHTML;
+  const logo=document.getElementById("logo").outerHTML;const arr=document.getElementById("arr").outerHTML;
+  const out=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900"><defs>${logo}${arr}</defs>${inner}</svg>`;
+  const st=document.getElementById("status");
+  navigator.clipboard.writeText(out).then(()=>st.textContent="Copied. Paste into Figma or Illustrator, or save as .svg.").catch(()=>st.textContent="Copy was blocked here. Ask Claude for the SVG file instead.");
+});
+document.getElementById("zIn").addEventListener("click",()=>{const r=board.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,0.8);});
+document.getElementById("zOut").addEventListener("click",()=>{const r=board.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,1.25);});
+document.getElementById("fit").addEventListener("click",()=>fitTo(BOUNDS));
+window.addEventListener("resize",apply);
+
+select(store("lastSheet")||SHEETS[0].id);
+fitTo(BOUNDS);
+})();
+</script>
