@@ -477,6 +477,66 @@ const BG={
   dims:{front:[{x1:206,y1:70,x2:394,y2:70,t:"TOP 23 · 14-WAY"},{x1:470,y1:92,x2:470,y2:600,t:"HEIGHT 89 · 2.2 KG",v:true}],back:[]},
   callouts:{front:[C(300,116,"1"),C(300,320,"2"),C(388,215,"3"),C(174,504,"4")],back:[C(220,300,"5")]}
 };
+
+const WSH="M254 96 L184 112 Q140 140 120 196 L160 220 Q176 206 196 200 Q186 300 204 360 Q196 470 200 560 Q300 572 400 560 Q404 470 396 360 Q414 300 404 200 Q424 206 440 220 L480 196 Q460 140 416 112 L346 96 ";
+const WPOL={
+  outline:{front:WSH+"Q300 126 254 96 Z",back:WSH+"Q300 104 254 96 Z"},
+  solid:{front:["M254 96 Q300 66 346 96","M254 96 L264 150 L298 122","M346 96 L336 150 L302 122","M259 100 L268 144","M341 100 L332 144","M126 186 L166 210","M120 194 L160 218","M474 186 L434 210","M480 194 L440 218"],
+         back:["M254 96 Q300 82 346 96","M126 186 L166 210","M474 186 L434 210"]},
+  dashed:{front:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M202 548 Q300 560 398 548","M290 122 L290 196","M310 122 L310 196"],back:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M202 548 Q300 560 398 548"]},
+  extra:{front:'<circle cx="300" cy="144" r="4" fill="none" stroke="var(--line)" stroke-width="1.5"/><circle cx="300" cy="174" r="4" fill="none" stroke="var(--line)" stroke-width="1.5"/>',back:''},
+  logo:{front:[342,176,19],back:null},
+  dims:{front:[{x1:196,y1:236,x2:404,y2:236,t:"½ BUST 46"},{x1:204,y1:360,x2:396,y2:360,t:"½ WAIST 42"},{x1:548,y1:96,x2:548,y2:564,t:"LENGTH 60 (HPS)",v:true}],back:[{x1:200,y1:600,x2:400,y2:600,t:"½ HEM 47"}]},
+  callouts:{front:[C(300,76,"1"),C(370,176,"2"),C(144,206,"3"),C(300,560,"4")],back:[C(300,360,"5")]}
+};
+const SLO="M256 96 L216 104 Q226 170 200 218 Q186 300 204 360 Q196 470 200 560 Q300 572 400 560 Q404 470 396 360 Q414 300 400 218 Q374 170 384 104 L344 96 ";
+const WSL={
+  outline:{front:SLO+"Q300 126 256 96 Z",back:SLO+"Q300 104 256 96 Z"},
+  solid:{front:["M256 96 Q300 66 344 96","M256 96 L266 150 L298 122","M344 96 L334 150 L302 122","M226 106 Q236 172 210 220","M374 106 Q364 172 390 220"],back:["M256 96 Q300 82 344 96","M226 106 Q236 172 210 220","M374 106 Q364 172 390 220"]},
+  dashed:{front:["M300 122 L300 196","M202 548 Q300 560 398 548"],back:["M202 548 Q300 560 398 548"]},
+  extra:{front:'',back:''},
+  logo:{front:[342,176,19],back:null},
+  dims:{front:[{x1:204,y1:250,x2:396,y2:250,t:"½ BUST 45"},{x1:548,y1:96,x2:548,y2:564,t:"LENGTH 59 (HPS)",v:true}],back:[]},
+  callouts:{front:[C(300,76,"1"),C(230,160,"2"),C(300,210,"3"),C(370,176,"4")],back:[]}
+};
+const DRO="M254 96 L184 112 Q140 140 120 196 L160 220 Q176 206 196 200 Q186 300 204 340 L168 640 Q300 656 432 640 L396 340 Q414 300 404 200 Q424 206 440 220 L480 196 Q460 140 416 112 L346 96 ";
+const WDR={
+  outline:{front:DRO+"Q300 126 254 96 Z",back:DRO+"Q300 104 254 96 Z"},
+  solid:{front:[...WPOL.solid.front,"M172 622 Q300 638 428 622"],back:[...WPOL.solid.back,"M172 622 Q300 638 428 622"]},
+  dashed:{front:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M204 340 Q300 352 396 340","M290 122 L290 214","M310 122 L310 214","M186 470 Q300 484 414 470"],back:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M204 340 Q300 352 396 340"]},
+  extra:{front:'<g fill="none" stroke="var(--line)" stroke-width="1.5"><circle cx="300" cy="144" r="4"/><circle cx="300" cy="172" r="4"/><circle cx="300" cy="200" r="4"/></g>',back:''},
+  logo:{front:[342,176,19],back:null},
+  dims:{front:[{x1:204,y1:340,x2:396,y2:340,t:"½ WAIST 38",above:true},{x1:548,y1:96,x2:548,y2:648,t:"LENGTH 88 (HPS)",v:true}],back:[{x1:168,y1:670,x2:432,y2:670,t:"½ HEM 60"}]},
+  callouts:{front:[C(300,76,"1"),C(320,206,"2"),C(300,470,"3"),C(300,630,"4")],back:[C(300,340,"5")]}
+};
+const SKO2="M200 80 L400 80 L404 112 L432 400 Q300 410 168 400 L196 112 Z";
+const WSK={
+  outline:{front:SKO2,back:SKO2},
+  solid:{front:["M196 112 L404 112","M250 112 L232 404","M350 112 L368 404"],back:["M196 112 L404 112",...Array.from({length:9},(_,i)=>`M${214+i*22} 140 L${206+i*24} 404`)]},
+  dashed:{front:["M200 106 L400 106","M206 94 Q230 130 200 150","M188 380 L412 380","M220 404 L222 430 L290 432 L298 404","M302 404 L310 432 L378 430 L380 404"],back:["M200 106 L400 106","M188 380 L412 380","M214 140 L386 140"]},
+  extra:{front:'<rect x="392" y="150" width="6" height="40" rx="2" fill="none" stroke="var(--line)" stroke-width="1.4"/>',back:''},
+  logo:{front:[372,360,15],back:null},
+  dims:{front:[{x1:200,y1:60,x2:400,y2:60,t:"½ WAIST 36"},{x1:470,y1:80,x2:470,y2:404,t:"LENGTH 41",v:true}],back:[{x1:168,y1:440,x2:432,y2:440,t:"½ HEM 62 · KNIFE PLEATS 3 CM"}]},
+  callouts:{front:[C(300,96,"1"),C(395,212,"2"),C(372,340,"3"),C(260,440,"4")],back:[C(300,250,"5")]}
+};
+const VZ={
+  outline:{front:"M170 300 Q300 272 430 300 L430 336 Q300 310 170 336 Z",back:"M150 320 Q300 300 450 320 L450 354 Q300 336 150 354 Z"},
+  solid:{front:["M170 336 Q300 470 430 336","M170 336 Q300 372 430 336"],back:["M248 324 L352 324 L352 350 L248 350 Z"]},
+  dashed:{front:["M184 344 Q300 456 416 344","M176 304 Q300 278 424 304"],back:["M156 336 Q300 318 444 336"]},
+  extra:{front:'',back:''},
+  logo:{front:[300,322,30],back:null},
+  dims:{front:[{x1:170,y1:500,x2:430,y2:500,t:"BRIM 7 CURVED"},{x1:460,y1:300,x2:460,y2:336,t:"BAND 4.5",v:true,small:true}],back:[{x1:248,y1:380,x2:352,y2:380,t:"VELCRO ADJUST 53-59"}]},
+  callouts:{front:[C(300,290,"1"),C(300,430,"2")],back:[C(300,300,"3")]}
+};
+const W_TR={...TR,dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 36 (S)"},{x1:548,y1:60,x2:548,y2:600,t:"INSEAM 71 · HIGH RISE",v:true}],back:[]}};
+const W_QZ={...QZ,dims:{front:[{x1:192,y1:300,x2:408,y2:300,t:"½ BUST 47 (S)",above:true},{x1:548,y1:96,x2:548,y2:600,t:"LENGTH 58 CROPPED",v:true}],back:[]}};
+const W_VS={...VS,dims:{front:[{x1:194,y1:300,x2:406,y2:300,t:"½ BUST 46 (S)",above:true},{x1:548,y1:90,x2:548,y2:600,t:"LENGTH 58",v:true}],back:[]}};
+const J_POL={...POLO,dims:{front:[{x1:188,y1:262,x2:412,y2:262,t:"½ CHEST 37 (AGE 10)"},{x1:548,y1:92,x2:548,y2:604,t:"LENGTH 51 (HPS)",v:true}],back:[]}};
+const J_QZ={...QZ,dims:{front:[{x1:192,y1:300,x2:408,y2:300,t:"½ CHEST 39 (AGE 10)",above:true},{x1:548,y1:96,x2:548,y2:600,t:"LENGTH 50",v:true}],back:[]}};
+const J_SH={...SH,dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 29.5 (AGE 10)"},{x1:548,y1:250,x2:548,y2:430,t:"INSEAM 7 IN",v:true}],back:[]}};
+const J_JG={...JG,dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 30 (AGE 10)"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 80",v:true}],back:[]}};
+const J_CP={...CAP,dims:{front:[{x1:150,y1:150,x2:450,y2:150,t:"FITS 50-55 CM"},{x1:500,y1:188,x2:500,y2:400,t:"CROWN 9.5",v:true}],back:[]}};
+const J_GL={...GL,dims:{front:[{x1:510,y1:148,x2:510,y2:600,t:"AGE 7-9 · LENGTH 19",v:true}],back:[]}};
 const SHEETS=[
   {id:"sg-pol-01",colors:"Black · White · Stone · Fog",x:0,y:0,style:"SG-POL-01",name:"Tour Polo",rev:"B",fabric:"180 gsm stretch pique, 88/12 rPET/elastane",size:"M (sample)",g:POLO,
    items:["Self-fabric knit collar with 3 mm stripe tipping","Wave-S logo, tonal embroidery, 50 mm, left chest","3-button placket 30 x 115 mm, matte horn buttons","Rib sleeve cuff 25 mm with stripe tipping","Straight hem 20 mm coverstitch, 30 mm side vents","Back yoke with centre box pleat for swing room","Back hem 2 cm longer than front; UPF 50, wicking"]},
@@ -534,6 +594,34 @@ const SHEETS=[
    items:["Number tags: 1, 3, H","Black piping stripe down both sides","Large embroidered wave-S on each cover","Centre back seam"]}
   ,{id:"sg-bg-01",x:12160,y:4480,style:"SG-BG-01",name:"Stand Bag",rev:"A",fabric:"Matte recycled nylon ripstop, 2.2 kg",colors:"Black · Stone",size:"M (sample)",g:BG,
    items:["14-way top with full-length dividers","Main pocket with large white wave-S","Magnetic rangefinder pocket","Reflective stripe tape on stand legs","Dual carry straps (back view)"]}
+  ,{id:"sg-w-pol-01",x:0,y:5600,style:"SG-W-POL-01",name:"Women's Tour Polo",rev:"A",fabric:"170 gsm stretch pique",colors:"White · Black · Stone · Clay",size:"S (sample)",g:WPOL,
+   items:["Self collar with stripe tipping","Wave-S 45 mm, tonal embroidery","Short cap sleeve with stripe cuff","Longer back hem, 2.5 cm side vents","Shaped waist (back view)"]}
+  ,{id:"sg-w-pol-02",x:1520,y:5600,style:"SG-W-POL-02",name:"Sleeveless Polo",rev:"A",fabric:"160 gsm stretch pique",colors:"White · Black · Green",size:"S (sample)",g:WSL,
+   items:["Self collar","Racer-cut armhole with stripe binding","Hidden snap placket","Wave-S 45 mm, tonal embroidery"]}
+  ,{id:"sg-w-dr-01",x:3040,y:5600,style:"SG-W-DR-01",name:"Polo Dress",rev:"A",fabric:"180 gsm stretch jersey",colors:"Black · White · Stone",size:"S (sample)",g:WDR,
+   items:["Knit collar with stripe tipping","3-snap placket, wave-S 45 mm","Built-in shorts with ball pocket (dashed)","Stripe tipping at hem","Waist seam, A-line skirt"]}
+  ,{id:"sg-w-sk-01",x:4560,y:5600,style:"SG-W-SK-01",name:"Pleated Skort",rev:"A",fabric:"200 gsm 4-way stretch woven, DWR",colors:"Black · White · Stone · Navy",size:"S (sample)",g:WSK,
+   items:["Waistband with silicone gripper and stripe tape","Zipped phone pocket at right hip","Wave-S 35 mm at left hem","Inner shorts with ball pockets (dashed)","Knife pleats at back and sides"]}
+  ,{id:"sg-w-tr-01",x:6080,y:5600,style:"SG-W-TR-01",name:"Women's Ankle Trouser",rev:"A",fabric:"220 gsm 4-way stretch twill",colors:"Black · Stone",size:"S (sample)",g:W_TR,
+   items:["High-rise waistband, button and hook","Slash pockets","Fly with YKK zip","Slim ankle-length leg, pressed crease","Zipped back pocket","Wave-S above back pocket","Waist gripper with stripe tape"]}
+  ,{id:"sg-w-qz-01",x:7600,y:5600,style:"SG-W-QZ-01",name:"Women's Quarter-Zip",rev:"A",fabric:"240 gsm brushed-back stretch jersey",colors:"Fog Grey · Black · Clay",size:"S (sample)",g:W_QZ,
+   items:["Mock neck, zip garage","Zip with stripe tipping","Wave-S 45 mm, tonal embroidery","Rib cuffs with thumb holes","Cropped length to sit over skort","Shaped side seams"]}
+  ,{id:"sg-w-vs-01",x:9120,y:5600,style:"SG-W-VS-01",name:"Women's Quilted Vest",rev:"A",fabric:"20D nylon, 80 gsm recycled fill",colors:"Black · Stone",size:"S (sample)",g:W_VS,
+   items:["Stand collar","Two-way zip","Welt pockets","Wave-S 45 mm","Wave-pattern quilting, shaped princess seams"]}
+  ,{id:"sg-w-vz-01",x:10640,y:5600,style:"SG-W-VZ-01",name:"Visor",rev:"A",fabric:"Performance poly twill",colors:"White · Black · Stone",size:"S (sample)",g:VZ,labels:["FRONT VIEW","BACK VIEW"],
+   items:["3D puff wave-S 45 mm on band","Curved 7 cm brim with stripe binding","Velcro back, ponytail friendly"]}
+  ,{id:"sg-j-pol-01",x:0,y:6720,style:"SG-J-POL-01",name:"Junior Tour Polo",rev:"A",fabric:"160 gsm stretch pique",colors:"White · Black · Green",size:"Age 10 (sample)",g:J_POL,
+   items:["Self collar with stripe tipping","Wave-S 35 mm","2-button placket, 18L buttons","Stripe cuffs","Hem coverstitch, no vents under age 8"]}
+  ,{id:"sg-j-qz-01",x:1520,y:6720,style:"SG-J-QZ-01",name:"Junior Quarter-Zip",rev:"A",fabric:"240 gsm brushed-back jersey",colors:"Fog Grey · Black",size:"Age 10 (sample)",g:J_QZ,
+   items:["Mock neck with zip garage","Easy-pull zip","Wave-S 35 mm","Rib cuffs, no thumb holes","Rib hem"]}
+  ,{id:"sg-j-sh-01",x:3040,y:6720,style:"SG-J-SH-01",name:"Junior Tour Short",rev:"A",fabric:"200 gsm stretch twill",colors:"Stone · Black",size:"Age 10 (sample)",g:J_SH,
+   items:["Snap front, elastic back waist","Tee loop","Wave-S 30 mm at left hem","Back pocket","Adjustable inner waistband"]}
+  ,{id:"sg-j-jg-01",x:4560,y:6720,style:"SG-J-JG-01",name:"Junior Jogger",rev:"A",fabric:"260 gsm double-knit",colors:"Black · Fog Grey",size:"Age 10 (sample)",g:J_JG,
+   items:["Elastic waist, inner drawcord","Flat drawcords","Side stripe piping","Wave-S 30 mm","Rib cuffs","Back pocket"]}
+  ,{id:"sg-j-cp-01",x:6080,y:6720,style:"SG-J-CP-01",name:"Junior Cap",rev:"A",fabric:"Washed cotton twill",colors:"Stone · White · Black",size:"Age 10 (sample)",g:J_CP,labels:["FRONT VIEW","SIDE VIEW"],
+   items:["Top button","Puff wave-S 40 mm","Brim with stripe binding","Velcro back, fits 50-55 cm","Low junior crown"]}
+  ,{id:"sg-j-gl-01",x:7600,y:6720,style:"SG-J-GL-01",name:"Junior Glove",rev:"A",fabric:"Synthetic leather palm, stretch back",colors:"White",size:"Age 10 (sample)",g:J_GL,labels:["BACK OF HAND","PALM"],
+   items:["Stretch knuckle band","Velcro tab with wave-S print","Stripe perforations","Reinforced palm"]}
 ];
 
 const CSSV=getComputedStyle(document.documentElement);
@@ -607,11 +695,11 @@ SHEETS.forEach(sh=>{
   sh.node=g;world.appendChild(g);
 });
 world.appendChild(el("g",{transform:"translate(6080 3360)"},ghostSVG()));
-[["POLOS · 5 STYLES",0,-30],["KNITWEAR · 4 STYLES",0,1090],["LAYERS & OUTERWEAR · 6 STYLES",0,2210],["BOTTOMS · 4 STYLES",0,3330],["HEADWEAR & ACCESSORIES · 9 STYLES",0,4450]].forEach(([t,x,y])=>world.appendChild(el("text",{x,y,fill:"var(--dim)","font-family":"var(--display)","font-weight":"600","font-size":"34","letter-spacing":"6"},t)));
+[["POLOS · 5 STYLES",0,-30],["KNITWEAR · 4 STYLES",0,1090],["LAYERS & OUTERWEAR · 6 STYLES",0,2210],["BOTTOMS · 4 STYLES",0,3330],["HEADWEAR & ACCESSORIES · 9 STYLES",0,4450],["WOMEN'S · 8 STYLES",0,5570],["JUNIOR · AGES 4-14 · 6 STYLES",0,6690]].forEach(([t,x,y])=>world.appendChild(el("text",{x,y,fill:"var(--dim)","font-family":"var(--display)","font-weight":"600","font-size":"34","letter-spacing":"6"},t)));
 
 /* ---------- pan / zoom via viewBox ---------- */
 let vb={x:-200,y:-200,w:8000,h:2400};
-const BOUNDS={x:-80,y:-90,w:13720,h:5500};
+const BOUNDS={x:-80,y:-90,w:13720,h:7740};
 function apply(){
   board.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   const r=board.getBoundingClientRect();
