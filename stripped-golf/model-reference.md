@@ -29,3 +29,4 @@ Use this description, plus the 5 reference photos, in every product shoot so the
 4. No earrings, watches or jewellery unless the product needs it.
 5. Every image is square, 1:1 aspect ratio, at 4K.
 6. Check every result against the face photo before using it; reject any image where his skin tone, hair or build has changed.
+7. Always build from the original reference photos, never from an earlier generated shot, so his face does not drift between shoots. Compare each result side by side with model-ref-1-face.
