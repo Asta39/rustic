@@ -30,3 +30,5 @@ Use this description, plus the 5 reference photos, in every product shoot so the
 5. Every image is square, 1:1 aspect ratio, at 4K.
 6. Check every result against the face photo before using it; reject any image where his skin tone, hair or build has changed.
 7. Always build from the original reference photos, never from an earlier generated shot, so his face does not drift between shoots. Compare each result side by side with model-ref-1-face.
+8. Use Seedream 4.5 with the edit method: his real golf-outfit photo goes in as image 1 and the prompt starts "Edit image 1", changing only clothes and pose. Never generate him from scratch, and never add "editorial" or "film grain" style words.
+9. Never attach a photo of another person as a pose reference; it copies their hair, jewellery and backdrop. Describe the pose in words instead.
