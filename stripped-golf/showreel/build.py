@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 R = '/home/user/rustic/stripped-golf'
-S = os.path.dirname(os.path.abspath(__file__))  # stills live in S/src when building
+S = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(S, 'frames'); os.makedirs(OUT, exist_ok=True)
 W, H = 1080, 1920
 AUDIO = '/root/.claude/uploads/43eb2aa6-3670-55e7-96e3-c2a66ade3a8f/fad20066-Video_by_wrnsweats_1920p1793271963343_SealX.m4a'
@@ -51,18 +51,22 @@ lg = Image.open(f'{R}/logo-system/stripped-logomark-black.png').convert('RGBA');
 F = lambda p, **k: cover(Image.open(p), **k)
 ind = f'{R}/pgm-shoot/club-set/individual'
 hero = f'{R}/pgm-shoot/homepage-hero'
+def fit(p, bg=(244,244,244)):
+    im = Image.open(p).convert('RGB'); s = W*0.92/im.width
+    im = im.resize((int(im.width*s), int(im.height*s)), Image.LANCZOS)
+    c = Image.new('RGB', (W, H), bg); c.paste(im, ((W-im.width)//2, (H-im.height)//2)); return c
 def nm(im): im.nomark = True; return im
 pool = [
     nm(F(f'{S}/src/emb1.png')), F(f'{S}/src/fold3.png'), model(f'{hero}/stripped-hero-pose1-back.png'),
     tag, gradient(BLACK, (200,200,200)), flat(BLACK), flat(LIGHT), flat(DEEP),
     model(f'{hero}/stripped-hero-pose6-black-polo.png'), F(f'{S}/src/knit1.png'),
-    model(f'{hero}/stripped-hero-pose2-front.png'), F(f'{ind}/03-taylormade-rescue-4-21-hybrid.jpg'),
-    F(f'{S}/src/fold1.png'), nm(F(f'{ind}/12-ben-sayers-m11-putter.jpg')), flat(CHAR),
+    model(f'{hero}/stripped-hero-pose2-front.png'), F('/tmp/claude-0/-home-user-rustic/43eb2aa6-3670-55e7-96e3-c2a66ade3a8f/images/36.webp'),
+    F(f'{S}/src/fold1.png'), F('/tmp/claude-0/-home-user-rustic/43eb2aa6-3670-55e7-96e3-c2a66ade3a8f/images/34.jpg', cy=0.45), flat(CHAR),
     nm(F(f'{S}/src/emb2.png')), model(f'{hero}/stripped-hero-pose3-anorak.png'), F(f'{S}/src/fold2.png'),
-    F(f'{ind}/02-taylormade-sldr-s-15-fairway-wood.jpg'), F(f'{S}/src/knit2.png'),
+    F('/tmp/claude-0/-home-user-rustic/43eb2aa6-3670-55e7-96e3-c2a66ade3a8f/images/37.webp'), F(f'{S}/src/knit2.png'),
     model(f'{hero}/stripped-hero-pose4-polo-sweater.png'), F(f'{R}/pgm-shoot/club-set/01-pgm-stand-bag.jpg', cy=0.55),
-    F(f'{ind}/04-iron-4.jpg', cy=0.6), model(f'{hero}/stripped-hero-pose5-anorak-glove-cap.png'),
-    F(f'{R}/pgm-shoot/club-set/02-clubs-in-bag.jpg'), F(f'{ind}/01-ben-sayers-m11-driver.jpg'),
+    F('/tmp/claude-0/-home-user-rustic/43eb2aa6-3670-55e7-96e3-c2a66ade3a8f/images/34.jpg', cx=0.3, cy=0.6), model(f'{hero}/stripped-hero-pose5-anorak-glove-cap.png'),
+    F(f'{R}/pgm-shoot/club-set/02-clubs-in-bag.jpg'), fit('/tmp/claude-0/-home-user-rustic/43eb2aa6-3670-55e7-96e3-c2a66ade3a8f/images/35.jpg', (255,255,255)),
 ]
 # put the logo on the tag (centred, so the overlay mark lands on it)
 
