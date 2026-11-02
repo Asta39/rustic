@@ -1,0 +1,781 @@
+<title>STRIPPED Golf Blueprints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one full-screen drafting board you pan and zoom; sheets sit on it like pinned drawings, chrome floats at the edges. Single deliberate dark blueprint look. */
+:root{
+  --paper:#0e3561;      /* blueprint ground */
+  --paper-deep:#0a2848; /* sheet ground */
+  --grid:rgba(160,205,255,.10);
+  --grid-major:rgba(160,205,255,.20);
+  --line:#eaf3ff;       /* drawn line */
+  --cyan:#8fd0ff;       /* dimensions and callouts */
+  --dim:#9cb8d8;        /* secondary text */
+  --chrome:rgba(8,30,56,.92);
+  --chrome-line:rgba(160,205,255,.28);
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--paper);color:var(--line);font-family:var(--mono);overflow:hidden;margin:0}
+#board{position:fixed;inset:0;touch-action:none;cursor:grab;display:block;width:100%;height:100%}
+#board.dragging{cursor:grabbing}
+.chrome{position:fixed;background:var(--chrome);border:1px solid var(--chrome-line);border-radius:4px;backdrop-filter:blur(6px)}
+#brand{top:calc(12px + env(safe-area-inset-top,0px));left:16px;display:flex;align-items:center;gap:10px;padding:8px 12px}
+#brand svg{width:22px;height:22px;display:block}
+#brand b{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.14em}
+#brand span{color:var(--dim);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#tools{bottom:calc(12px + env(safe-area-inset-bottom,0px));left:16px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px;max-width:calc(100% - 32px)}
+button{font:500 12px var(--mono);color:var(--line);background:transparent;border:1px solid var(--chrome-line);border-radius:3px;padding:6px 10px;cursor:pointer;letter-spacing:.04em}
+button:hover{border-color:var(--cyan);color:var(--cyan)}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--cyan);color:var(--paper-deep);border-color:var(--cyan)}
+#zoomval{min-width:48px;text-align:center;color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+.sep{width:1px;height:20px;background:var(--chrome-line)}
+#panel{top:calc(12px + env(safe-area-inset-top,0px));right:16px;width:300px;max-width:calc(100% - 32px);padding:12px;display:flex;flex-direction:column;gap:10px}
+#panel h2{margin:0;font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:.06em;text-wrap:balance}
+#panel .meta{color:var(--dim);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+#panel ol{margin:0;padding-left:20px;font-size:12px;line-height:1.55;color:var(--line)}
+#panel label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+#notes{width:100%;box-sizing:border-box;min-height:84px;resize:vertical;background:var(--paper-deep);color:var(--line);border:1px solid var(--chrome-line);border-radius:3px;font:12px/1.5 var(--mono);padding:8px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+#status{font-size:11px;color:var(--cyan);min-height:14px}
+#hint{color:var(--dim);font-size:11px;line-height:1.5}
+@media (max-width:640px){
+  #panel{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));right:16px;left:16px;width:auto;max-height:42vh;overflow:auto}
+  #brand span{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg id="board" role="img" aria-label="Blueprint board with STRIPPED Golf garment spec sheets">
+  <defs>
+    <pattern id="gMinor" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--grid)" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern>
+    <pattern id="gMajor" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="url(#gMinor)"/><path d="M100 0H0V100" fill="none" stroke="var(--grid-major)" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1L10 5L0 9Z" fill="var(--cyan)"/></marker>
+    <pattern id="mesh" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0L8 8M8 0L0 8" stroke="var(--line)" stroke-width=".7" opacity=".55"/></pattern>
+    <pattern id="openknit" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="1.6" fill="none" stroke="var(--line)" stroke-width=".7" opacity=".45"/></pattern>
+    <path id="logo" d="M 128 192 C 92.654 192 64 220.654 64 256 L 0 256 C 0 185.308 57.308 128 128 128 Z M 256 128 C 256 198.692 198.692 256 128 256 L 128 192 C 163.346 192 192 163.346 192 128 Z M 128 64 C 92.654 64 64 92.654 64 128 L 0 128 C 0 57.308 57.308 0 128 0 Z M 256 0 C 256 70.692 198.692 128 128 128 L 128 64 C 163.346 64 192 35.346 192 0 Z"/>
+  </defs>
+  <rect id="ground" x="-20000" y="-20000" width="40000" height="40000" fill="url(#gMajor)"/>
+  <g id="world"></g>
+</svg>
+
+<div id="brand" class="chrome">
+  <svg viewBox="0 0 256 256" aria-hidden="true"><use href="#logo" fill="var(--line)"/></svg>
+  <b>STRIPPED</b><span>Golf · Blueprint board</span>
+</div>
+
+<aside id="panel" class="chrome" aria-live="polite">
+  <div class="meta" id="pMeta"></div>
+  <h2 id="pTitle"></h2>
+  <ol id="pCallouts"></ol>
+  <label for="notes">Notes on this sheet</label>
+  <textarea id="notes" placeholder="Fabric, colourways, fit changes… saved in this browser"></textarea>
+  <div class="row">
+    <button id="copySvg" type="button">Copy sheet SVG</button>
+    <button id="focusBtn" type="button">Zoom to sheet</button>
+  </div>
+  <div id="status"></div>
+  <div id="hint">Drag to pan · scroll or pinch to zoom · click a sheet to select it.</div>
+</aside>
+
+<nav id="tools" class="chrome" aria-label="Board controls">
+  <button id="zOut" type="button" aria-label="Zoom out">−</button>
+  <span id="zoomval">100%</span>
+  <button id="zIn" type="button" aria-label="Zoom in">+</button>
+  <button id="fit" type="button">Fit all</button>
+  <span class="sep" aria-hidden="true"></span>
+  <span id="sheetBtns" class="row"></span>
+</nav>
+
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg";
+const world=document.getElementById("world");
+const board=document.getElementById("board");
+
+/* ---------- garment drawings (local 600 x 700 view space) ---------- */
+const POLO={
+  outline:{
+    front:"M250 92 L172 112 Q120 150 94 214 L140 244 Q160 226 188 208 L188 600 Q300 612 412 600 L412 208 Q440 226 460 244 L506 214 Q480 150 428 112 L350 92 Q300 128 250 92 Z",
+    back:"M250 92 L172 112 Q120 150 94 214 L140 244 Q160 226 188 208 L188 600 Q300 612 412 600 L412 208 Q440 226 460 244 L506 214 Q480 150 428 112 L350 92 Q300 100 250 92 Z"
+  },
+  solid:{
+    front:["M250 92 Q300 58 350 92","M250 92 L262 154 L298 120","M350 92 L338 154 L302 120","M103 200 L149 231","M497 200 L451 231","M256 97 L266 147","M344 97 L334 147","M98 207 L144 238","M502 207 L456 238"],
+    back:["M250 92 Q300 76 350 92","M178 140 Q300 156 422 140","M292 147 L296 172","M308 147 L304 172","M188 600 L196 570","M412 600 L404 570","M103 200 L149 231","M497 200 L451 231"]
+  },
+  dashed:{
+    front:["M172 112 Q186 160 188 208","M428 112 Q414 160 412 208","M108 193 L154 224","M492 193 L446 224","M188 588 Q300 600 412 588","M287 120 L287 236","M313 120 L313 236"],
+    back:["M172 112 Q186 160 188 208","M428 112 Q414 160 412 208","M108 193 L154 224","M492 193 L446 224","M196 588 Q300 600 404 588","M178 146 Q300 162 422 146"]
+  },
+  extra:{
+    front:'<rect x="287" y="120" width="26" height="116" fill="none" stroke="var(--line)" stroke-width="2"/><circle cx="300" cy="142" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="300" cy="174" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="300" cy="206" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',
+    back:''
+  },
+  logo:{front:[346,182,21],back:null},
+  dims:{
+    front:[{x1:188,y1:262,x2:412,y2:262,t:"½ CHEST 54"},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 74 (HPS)",v:true},{x1:94,y1:268,x2:140,y2:298,t:"SLV 23",small:true}],
+    back:[{x1:188,y1:640,x2:412,y2:640,t:"½ HEM 53"},{x1:250,y1:52,x2:350,y2:52,t:"NECK 18"}]
+  },
+  callouts:{
+    front:[[296,74,"1"],[376,182,"2"],[318,226,"3"],[120,212,"4"],[300,600,"5"]],
+    back:[[300,150,"6"],[190,584,"7"]]
+  }
+};
+const QZ={
+  outline:{
+    front:"M250 96 L172 116 Q140 150 128 220 L106 556 L156 566 L178 300 Q182 250 192 214 L192 596 L408 596 L408 214 Q418 250 422 300 L444 566 L494 556 L472 220 Q460 150 428 116 L350 96 Z",
+    back:"M250 96 L172 116 Q140 150 128 220 L106 556 L156 566 L178 300 Q182 250 192 214 L192 596 L408 596 L408 214 Q418 250 422 300 L444 566 L494 556 L472 220 Q460 150 428 116 L350 96 Z"
+  },
+  solid:{
+    front:["M250 96 L254 50 Q300 42 346 50 L350 96","M254 50 Q300 60 346 50","M192 570 L408 570","M109 520 L159 530","M491 520 L441 530","M296 48 L296 300","M304 48 L304 300","M296 300 L304 300"],
+    back:["M250 96 L254 54 Q300 48 346 54 L350 96","M254 54 Q300 64 346 54","M192 570 L408 570","M109 520 L159 530","M491 520 L441 530"]
+  },
+  dashed:{
+    front:["M172 116 Q186 166 192 214","M428 116 Q414 166 408 214","M300 52 L300 296","M192 582 L408 582"],
+    back:["M172 116 Q186 166 192 214","M428 116 Q414 166 408 214","M192 582 L408 582","M300 96 L300 570"]
+  },
+  extra:{
+    front:'<rect x="294" y="58" width="12" height="22" rx="2" fill="none" stroke="var(--line)" stroke-width="1.8"/>',
+    back:''
+  },
+  logo:{front:[346,182,21],back:null},
+  dims:{
+    front:[{x1:192,y1:300,x2:408,y2:300,t:"½ CHEST 57",above:true},{x1:548,y1:96,x2:548,y2:600,t:"BODY LENGTH 72 (HPS)",v:true},{x1:310,y1:48,x2:310,y2:300,t:"ZIP 25",v:true,small:true}],
+    back:[{x1:192,y1:640,x2:408,y2:640,t:"½ HEM 52"},{x1:52,y1:116,x2:52,y2:560,t:"SLV 64",v:true}]
+  },
+  callouts:{
+    front:[[300,30,"1"],[316,250,"2"],[376,182,"3"],[132,540,"4"],[300,580,"5"]],
+    back:[[300,330,"6"],[204,104,"7"]]
+  }
+};
+
+
+const OUT_SS="M250 92 L172 112 Q120 150 94 214 L140 244 Q160 226 188 208 L188 600 L412 600 L412 208 Q440 226 460 244 L506 214 Q480 150 428 112 L350 92 ";
+const KNIT={
+  outline:{front:OUT_SS+"Q300 128 250 92 Z",back:OUT_SS+"Q300 100 250 92 Z"},
+  solid:{
+    front:["M250 92 Q300 58 350 92","M250 92 L262 150 L298 120","M350 92 L338 150 L302 120","M256 96 L266 142","M261 98 L270 138","M344 96 L334 142","M339 98 L330 138","M188 566 L412 566","M188 578 L412 578","M188 586 L412 586","M106 196 L152 227","M100 205 L146 236","M97 209 L143 240","M494 196 L448 227","M500 205 L454 236","M503 209 L457 240"],
+    back:["M250 92 Q300 76 350 92","M188 566 L412 566","M188 578 L412 578","M188 586 L412 586","M106 196 L152 227","M100 205 L146 236","M97 209 L143 240","M494 196 L448 227","M500 205 L454 236","M503 209 L457 240"]
+  },
+  dashed:{front:["M172 112 Q186 160 188 208","M428 112 Q414 160 412 208"],back:["M172 112 Q186 160 188 208","M428 112 Q414 160 412 208"]},
+  extra:{front:'<rect x="288" y="120" width="24" height="84" fill="none" stroke="var(--line)" stroke-width="2"/><circle cx="300" cy="142" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="300" cy="178" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:''},
+  logo:{front:[346,182,21],back:[300,330,200,.28]},
+  dims:{front:[{x1:188,y1:262,x2:412,y2:262,t:"½ CHEST 56"},{x1:548,y1:92,x2:548,y2:600,t:"BODY LENGTH 72 (HPS)",v:true},{x1:430,y1:566,x2:430,y2:600,t:"RIB 35",v:true,small:true}],
+        back:[{x1:200,y1:470,x2:400,y2:470,t:"BACK MARK 200"},{x1:188,y1:640,x2:412,y2:640,t:"½ HEM 54"}]},
+  callouts:{front:[[296,74,"1"],[318,170,"2"],[376,182,"3"],[120,214,"4"],[300,582,"5"]],back:[[300,226,"6"]]}
+};
+const MESH={
+  outline:{front:OUT_SS.replace("L188 600 L412 600","L188 600 Q300 612 412 600")+"Q300 128 250 92 Z",back:OUT_SS.replace("L188 600 L412 600","L188 600 Q300 612 412 600")+"Q300 100 250 92 Z"},
+  solid:{
+    front:["M250 92 Q300 62 350 92","M250 92 L264 140 L298 116","M350 92 L336 140 L302 116","M103 200 L149 231","M497 200 L451 231"],
+    back:["M250 92 Q300 78 350 92","M103 200 L149 231","M497 200 L451 231"]
+  },
+  dashed:{
+    front:["M256 96 L186 206","M262 96 L192 208","M344 96 L414 206","M338 96 L408 208","M291 116 L291 228","M188 588 Q300 600 412 588"],
+    back:["M256 94 L186 206","M262 94 L192 208","M344 94 L414 206","M338 94 L408 208","M188 588 Q300 600 412 588"]
+  },
+  extra:{
+    front:'<g fill="var(--line)" opacity=".8"><circle cx="196" cy="226" r="1.6"/><circle cx="196" cy="236" r="1.6"/><circle cx="196" cy="246" r="1.6"/><circle cx="204" cy="231" r="1.6"/><circle cx="204" cy="241" r="1.6"/><circle cx="404" cy="226" r="1.6"/><circle cx="404" cy="236" r="1.6"/><circle cx="404" cy="246" r="1.6"/><circle cx="396" cy="231" r="1.6"/><circle cx="396" cy="241" r="1.6"/></g>',
+    back:'<path d="M222 150 Q300 168 378 150 L378 560 Q300 572 222 560 Z" fill="url(#mesh)" stroke="var(--line)" stroke-width="1.6"/>'
+  },
+  logo:{front:[346,180,19],back:null},
+  dims:{front:[{x1:188,y1:262,x2:412,y2:262,t:"½ CHEST 53"},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 73 (HPS)",v:true}],
+        back:[{x1:222,y1:600,x2:378,y2:600,t:"MESH PANEL 40 × 41"}]},
+  callouts:{front:[[300,74,"1"],[228,146,"2"],[291,240,"3"],[214,236,"4"],[374,180,"5"]],back:[[300,360,"6"]]}
+};
+const OUT_LS="M250 92 L172 112 Q140 150 128 220 L106 556 L156 566 L178 300 Q182 250 190 210 L190 600 Q300 612 410 600 L410 210 Q418 250 422 300 L444 566 L494 556 L472 220 Q460 150 428 112 L350 92 ";
+const LSP={
+  outline:{front:OUT_LS+"Q300 128 250 92 Z",back:OUT_LS+"Q300 100 250 92 Z"},
+  solid:{
+    front:["M250 92 Q300 58 350 92","M250 92 L262 154 L298 120","M350 92 L338 154 L302 120","M256 97 L266 147","M344 97 L334 147","M109 516 L159 526","M108 530 L158 540","M491 516 L441 526","M492 530 L442 540"],
+    back:["M250 92 Q300 76 350 92","M178 140 Q300 156 422 140","M292 147 L296 172","M308 147 L304 172","M109 516 L159 526","M108 530 L158 540","M491 516 L441 526","M492 530 L442 540"]
+  },
+  dashed:{front:["M172 112 Q186 160 190 210","M428 112 Q414 160 410 210","M190 588 Q300 600 410 588","M287 120 L287 236","M313 120 L313 236"],
+          back:["M172 112 Q186 160 190 210","M428 112 Q414 160 410 210","M190 588 Q300 600 410 588","M178 146 Q300 162 422 146"]},
+  extra:{front:POLO.extra.front,back:''},
+  logo:{front:[346,182,21],back:null},
+  dims:{front:[{x1:190,y1:262,x2:410,y2:262,t:"½ CHEST 54"},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 74 (HPS)",v:true}],
+        back:[{x1:52,y1:112,x2:52,y2:560,t:"SLV 63 + CUFF 4",v:true}]},
+  callouts:{front:[[296,74,"1"],[376,182,"2"],[318,190,"3"],[134,528,"4"]],back:[[300,150,"5"]]}
+};
+const OUT_RS="M248 90 L150 104 Q110 170 92 236 L146 258 Q160 240 176 226 L176 604 L424 604 L424 226 Q440 240 454 258 L508 236 Q490 170 450 104 L352 90 ";
+const RESORT={
+  outline:{front:OUT_RS+"Q300 140 248 90 Z",back:OUT_RS+"Q300 100 248 90 Z"},
+  solid:{
+    front:["M248 90 L232 114 L272 172 L300 134","M352 90 L368 114 L328 172 L300 134","M300 134 L300 236","M176 556 L424 556","M176 580 L424 580"],
+    back:["M248 90 Q300 74 352 90","M176 556 L424 556","M176 580 L424 580"]
+  },
+  dashed:{front:["M150 104 Q162 170 176 226","M450 104 Q438 170 424 226","M100 226 L152 248","M500 226 L448 248","M176 594 L424 594"],
+          back:["M150 104 Q162 170 176 226","M450 104 Q438 170 424 226","M100 226 L152 248","M500 226 L448 248","M176 594 L424 594"]},
+  extra:{
+    front:'<rect x="178" y="232" width="244" height="320" fill="url(#openknit)"/><rect x="176" y="562" width="248" height="12" fill="var(--line)" opacity=".85"/><circle cx="300" cy="170" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="300" cy="212" r="4.5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',
+    back:'<rect x="178" y="120" width="244" height="432" fill="url(#openknit)"/><rect x="176" y="562" width="248" height="12" fill="var(--line)" opacity=".85"/>'
+  },
+  logo:{front:[350,202,15],back:null},
+  dims:{front:[{x1:176,y1:290,x2:424,y2:290,t:"½ CHEST 60 (BOXY)",above:true},{x1:548,y1:90,x2:548,y2:604,t:"BODY LENGTH 70 (HPS)",v:true}],
+        back:[{x1:176,y1:640,x2:424,y2:640,t:"½ HEM 60"},{x1:150,y1:80,x2:248,y2:80,t:"DROP SHLDR 6",small:true}]},
+  callouts:{front:[[252,140,"1"],[316,190,"2"],[300,568,"3"],[374,202,"4"]],back:[[300,300,"5"]]}
+};
+
+const RIB_LS=["M109 516 L159 526","M108 530 L158 540","M491 516 L441 526","M492 530 L442 540"];
+const C=(x,y,n)=>[x,y,n];
+const KN1={
+  outline:{front:OUT_LS+"Q300 128 250 92 Z",back:OUT_LS+"Q300 100 250 92 Z"},
+  solid:{front:["M250 92 Q300 58 350 92","M250 92 L262 154 L298 120","M350 92 L338 154 L302 120","M190 570 L410 570",...RIB_LS],
+         back:["M250 92 Q300 76 350 92","M190 570 L410 570",...RIB_LS]},
+  dashed:{front:["M172 112 Q186 160 190 210","M428 112 Q414 160 410 210","M297 120 L297 214","M303 120 L303 214"],
+          back:["M172 112 Q186 160 190 210","M428 112 Q414 160 410 210"]},
+  extra:{front:'<path d="M250 92 L262 154 L298 120 L300 92 Z M350 92 L338 154 L302 120 L300 92 Z" fill="var(--line)" opacity=".22"/><rect x="295" y="122" width="10" height="16" rx="2" fill="none" stroke="var(--line)" stroke-width="1.6"/><g fill="var(--line)" opacity=".85"><rect x="190" y="236" width="220" height="10"/><rect x="190" y="256" width="220" height="10"/><rect x="190" y="276" width="220" height="10"/></g>',
+         back:'<g fill="var(--line)" opacity=".85"><rect x="190" y="236" width="220" height="10"/><rect x="190" y="256" width="220" height="10"/><rect x="190" y="276" width="220" height="10"/></g>'},
+  logo:{front:[346,186,21],back:null},
+  dims:{front:[{x1:190,y1:320,x2:410,y2:320,t:"½ CHEST 55",above:true},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 70 (HPS)",v:true},{x1:430,y1:236,x2:430,y2:286,t:"BAND 12",v:true,small:true}],
+        back:[{x1:52,y1:112,x2:52,y2:560,t:"SLV 64",v:true}]},
+  callouts:{front:[C(296,74,"1"),C(318,170,"2"),C(374,186,"3"),C(300,261,"4"),C(134,528,"5")],back:[C(300,261,"6")]}
+};
+const KN2={
+  outline:{front:OUT_LS+"Q300 130 250 92 Z",back:OUT_LS+"Q300 100 250 92 Z"},
+  solid:{front:["M258 98 Q300 142 342 98","M190 570 L410 570",...RIB_LS],back:["M258 98 Q300 112 342 98","M190 570 L410 570",...RIB_LS]},
+  dashed:{front:["M172 112 Q186 160 190 210","M428 112 Q414 160 410 210"],back:["M172 112 Q186 160 190 210","M428 112 Q414 160 410 210"]},
+  extra:{front:'<path d="M190 330 C262 330 300 372 300 428 C300 484 338 520 410 520 L410 600 Q300 612 190 600 Z" fill="var(--line)" opacity=".28" stroke="var(--line)" stroke-width="1.6"/>',
+         back:'<path d="M410 330 C338 330 300 372 300 428 C300 484 262 520 190 520 L190 600 Q300 612 410 600 Z" fill="var(--line)" opacity=".28" stroke="var(--line)" stroke-width="1.6"/>'},
+  logo:{front:null,back:null},
+  dims:{front:[{x1:190,y1:262,x2:410,y2:262,t:"½ CHEST 56"},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 69 (HPS)",v:true}],
+        back:[{x1:52,y1:112,x2:52,y2:560,t:"SLV 63",v:true}]},
+  callouts:{front:[C(300,74,"1"),C(300,430,"2"),C(134,528,"3"),C(300,585,"4")],back:[C(300,430,"5")]}
+};
+const KN3={
+  outline:QZ.outline,
+  solid:{front:["M250 96 L254 50 Q300 42 346 50 L350 96","M254 50 Q300 60 346 50","M192 570 L408 570","M109 520 L159 530","M491 520 L441 530","M293 48 L293 300","M307 48 L307 300","M296 48 L296 300","M304 48 L304 300","M296 300 L304 300","M106 532 L156 542","M494 532 L444 542"],
+         back:["M250 96 L254 54 Q300 48 346 54 L350 96","M254 54 Q300 64 346 54","M192 570 L408 570","M109 520 L159 530","M491 520 L441 530","M106 532 L156 542","M494 532 L444 542"]},
+  dashed:{front:["M254 96 L186 214","M346 96 L414 214"],back:["M254 96 L186 214","M346 96 L414 214"]},
+  extra:QZ.extra,
+  logo:{front:[346,186,21],back:null},
+  dims:{front:[{x1:192,y1:330,x2:408,y2:330,t:"½ CHEST 54",above:true},{x1:548,y1:96,x2:548,y2:600,t:"BODY LENGTH 70 (HPS)",v:true},{x1:316,y1:48,x2:316,y2:300,t:"ZIP 25",v:true,small:true}],
+        back:[{x1:52,y1:116,x2:52,y2:560,t:"SLV 65 (RAGLAN)",v:true}]},
+  callouts:{front:[C(300,30,"1"),C(270,180,"2"),C(374,186,"3"),C(134,540,"4")],back:[C(230,150,"5")]}
+};
+const KN4={
+  outline:{front:"M252 90 L200 100 Q214 170 196 236 L192 600 L408 600 L404 236 Q386 170 400 100 L348 90 L300 206 Z",back:"M252 90 L200 100 Q214 170 196 236 L192 600 L408 600 L404 236 Q386 170 400 100 L348 90 Q300 102 252 90 Z"},
+  solid:{front:["M262 92 L300 188 L338 92","M268 94 L300 176 L332 94","M210 102 Q222 172 206 236","M390 102 Q378 172 394 236","M192 566 L408 566","M192 576 L408 576"],
+         back:["M256 98 Q300 110 344 98","M210 102 Q222 172 206 236","M390 102 Q378 172 394 236","M192 566 L408 566","M192 576 L408 576"]},
+  dashed:{front:[],back:[]},
+  extra:{front:'',back:''},
+  logo:{front:[352,232,21],back:null},
+  dims:{front:[{x1:192,y1:300,x2:408,y2:300,t:"½ CHEST 54",above:true},{x1:548,y1:90,x2:548,y2:600,t:"BODY LENGTH 66 (HPS)",v:true},{x1:150,y1:100,x2:150,y2:236,t:"ARMHOLE 26",v:true,small:true}],
+        back:[{x1:192,y1:640,x2:408,y2:640,t:"½ HEM 53"}]},
+  callouts:{front:[C(300,140,"1"),C(220,170,"2"),C(380,232,"3"),C(300,571,"4")],back:[]}
+};
+const WS={
+  outline:{front:"M246 92 L160 108 Q118 160 96 238 L150 262 Q166 246 180 232 L180 604 L420 604 L420 232 Q434 246 450 262 L504 238 Q482 160 440 108 L354 92 Z",
+           back:"M246 92 L160 108 Q118 160 96 238 L150 262 Q166 246 180 232 L180 604 L420 604 L420 232 Q434 246 450 262 L504 238 Q482 160 440 108 L354 92 Z"},
+  solid:{front:["M246 92 L250 44 Q300 38 350 44 L354 92","M250 44 Q300 52 350 44","M296 44 L296 330","M304 44 L304 330","M296 330 L304 330","M214 170 L274 170 L274 240 L214 240 Z","M180 586 L420 586"],
+         back:["M246 92 L250 48 Q300 42 350 48 L354 92","M160 108 Q300 152 440 108","M180 586 L420 586"]},
+  dashed:{front:["M160 108 Q172 170 180 232","M440 108 Q428 170 420 232","M218 176 L270 176","M104 226 L156 250","M496 226 L444 250"],
+          back:["M160 108 Q172 170 180 232","M440 108 Q428 170 420 232","M104 226 L156 250","M496 226 L444 250"]},
+  extra:{front:'<rect x="294" y="52" width="12" height="22" rx="2" fill="none" stroke="var(--line)" stroke-width="1.8"/><circle cx="204" cy="595" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="396" cy="595" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',
+         back:'<g fill="var(--line)">'+[0,1,2].map(r=>Array.from({length:22},(_,i)=>`<circle cx="${196+i*10+(r%2)*5}" cy="${150+r*10+Math.abs(i-11)*1.6}" r="1.7"/>`).join("")).join("")+'</g><circle cx="204" cy="595" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="396" cy="595" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/>'},
+  logo:{front:[346,186,21],back:null},
+  dims:{front:[{x1:180,y1:300,x2:420,y2:300,t:"½ CHEST 58 (OVERSIZED)",above:true},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 71 (HPS)",v:true},{x1:316,y1:44,x2:316,y2:330,t:"ZIP 28",v:true,small:true}],
+        back:[{x1:196,y1:120,x2:410,y2:120,t:"VENT BAND 52"}]},
+  callouts:{front:[C(300,26,"1"),C(244,205,"2"),C(374,186,"3"),C(300,595,"4")],back:[C(300,180,"5")]}
+};
+const OUT_DS="M246 96 L150 112 Q120 200 108 300 L96 560 L150 568 L166 330 L176 250 L176 600 L424 600 L424 250 L434 330 L450 568 L504 560 L492 300 Q480 200 450 112 L354 96 ";
+const DS_RIB=["M100 536 L152 544","M500 536 L448 544","M176 560 L424 560"];
+const HD={
+  outline:{front:OUT_DS+"Q300 130 246 96 Z",back:OUT_DS+"Q300 104 246 96 Z"},
+  solid:{front:["M246 96 Q236 40 300 28 Q364 40 354 96","M262 98 Q300 156 338 98","M262 98 Q270 52 300 46 Q330 52 338 98","M286 118 L286 196","M314 118 L314 196","M210 470 L390 470 L404 556 L196 556 Z",...DS_RIB],
+         back:["M246 96 Q236 34 300 22 Q364 34 354 96",...DS_RIB]},
+  dashed:{front:["M150 112 Q162 180 176 250","M450 112 Q438 180 424 250","M230 472 L210 556","M370 472 L390 556"],
+          back:["M150 112 Q162 180 176 250","M450 112 Q438 180 424 250","M300 22 L300 96"]},
+  extra:{front:'<rect x="176" y="574" width="248" height="10" fill="var(--line)" opacity=".85"/>',back:'<rect x="176" y="574" width="248" height="10" fill="var(--line)" opacity=".85"/>'},
+  logo:{front:null,back:[300,320,116,.32]},
+  dims:{front:[{x1:176,y1:300,x2:424,y2:300,t:"½ CHEST 62 (RELAXED)",above:true},{x1:548,y1:96,x2:548,y2:600,t:"BODY LENGTH 70 (HPS)",v:true}],
+        back:[{x1:242,y1:400,x2:358,y2:400,t:"BACK MARK 280"}]},
+  callouts:{front:[C(300,20,"1"),C(300,206,"2"),C(300,512,"3"),C(300,579,"4")],back:[C(300,250,"5")]}
+};
+const CR={
+  outline:{front:OUT_DS+"Q300 132 246 96 Z",back:OUT_DS+"Q300 104 246 96 Z"},
+  solid:{front:["M254 102 Q300 146 346 102",...DS_RIB],back:["M254 102 Q300 116 346 102",...DS_RIB]},
+  dashed:{front:["M150 112 Q162 180 176 250","M450 112 Q438 180 424 250","M176 590 L424 590"],back:["M150 112 Q162 180 176 250","M450 112 Q438 180 424 250","M176 590 L424 590"]},
+  extra:{front:'<path d="M250 99 Q300 139 350 99" fill="none" stroke="var(--line)" stroke-width="4" opacity=".85"/>',back:'<path d="M250 99 Q300 110 350 99" fill="none" stroke="var(--line)" stroke-width="4" opacity=".85"/>'},
+  logo:{front:[346,190,21],back:null},
+  dims:{front:[{x1:176,y1:300,x2:424,y2:300,t:"½ CHEST 61 (RELAXED)",above:true},{x1:548,y1:96,x2:548,y2:600,t:"BODY LENGTH 69 (HPS)",v:true}],
+        back:[{x1:52,y1:112,x2:52,y2:560,t:"SLV 60 (DROPPED)",v:true}]},
+  callouts:{front:[C(300,74,"1"),C(374,190,"2"),C(126,540,"3")],back:[C(300,140,"4")]}
+};
+const VSO="M250 90 L206 100 Q216 170 198 236 L194 600 L406 600 L402 236 Q384 170 394 100 L350 90 Z";
+const quilt=(clip)=>`<g clip-path="url(#${clip})" fill="none" stroke="var(--line)" stroke-width="1" opacity=".6">`+Array.from({length:13},(_,i)=>`<path d="M180 ${130+i*38} q26 -14 52 0 t52 0 t52 0 t52 0 t52 0"/>`).join("")+'</g>';
+const VS={
+  outline:{front:VSO,back:VSO},
+  solid:{front:["M250 90 L252 50 Q300 44 348 50 L350 90","M252 50 Q300 58 348 50","M298 50 L298 600","M302 50 L302 600","M214 104 Q226 172 208 236","M386 104 Q374 172 392 236"],
+         back:["M250 90 L252 52 Q300 46 348 52 L350 90","M214 104 Q226 172 208 236","M386 104 Q374 172 392 236"]},
+  dashed:{front:["M220 420 L236 480","M380 420 L364 480"],back:[]},
+  extra:{front:'<clipPath id="cVSf"><path d="'+VSO+'"/></clipPath>'+quilt("cVSf"),back:'<clipPath id="cVSb"><path d="'+VSO+'"/></clipPath>'+quilt("cVSb")},
+  logo:{front:[346,176,21],back:null},
+  dims:{front:[{x1:194,y1:300,x2:406,y2:300,t:"½ CHEST 55",above:true},{x1:548,y1:90,x2:548,y2:600,t:"BODY LENGTH 68 (HPS)",v:true}],
+        back:[{x1:180,y1:130,x2:180,y2:168,t:"QUILT 9",v:true,small:true}]},
+  callouts:{front:[C(300,34,"1"),C(300,320,"2"),C(228,450,"3"),C(374,176,"4")],back:[C(300,360,"5")]}
+};
+const JKO="M248 92 L176 110 Q150 140 136 214 L108 556 L160 566 L182 300 Q186 250 192 214 L192 604 L408 604 L408 214 Q414 250 418 300 L440 566 L492 556 L464 214 Q450 140 424 110 L352 92 Z";
+const JK={
+  outline:{front:JKO,back:JKO},
+  solid:{front:["M248 92 L250 38 Q300 30 350 38 L352 92","M250 38 Q300 48 350 38","M297 38 L297 604","M303 38 L303 604","M206 410 L234 500","M394 410 L366 500","M246 170 L246 250","M180 590 L420 590"],
+         back:["M248 92 L250 40 Q300 32 350 40 L352 92","M200 168 Q300 196 400 168","M210 176 Q300 204 390 176","M180 590 L420 590"]},
+  dashed:{front:["M256 92 L190 214","M344 92 L410 214","M126 380 Q140 384 150 378","M474 380 Q460 384 450 378"],
+          back:["M256 92 L190 214","M344 92 L410 214","M126 380 Q140 384 150 378","M474 380 Q460 384 450 378"]},
+  extra:{front:'<rect x="292" y="46" width="16" height="10" rx="2" fill="none" stroke="var(--line)" stroke-width="1.4"/><circle cx="210" cy="597" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="390" cy="597" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:''},
+  logo:{front:[352,186,21],back:null},
+  dims:{front:[{x1:192,y1:320,x2:408,y2:320,t:"½ CHEST 57",above:true},{x1:548,y1:92,x2:548,y2:604,t:"BODY LENGTH 74 (HPS)",v:true}],
+        back:[{x1:52,y1:110,x2:52,y2:560,t:"SLV 66 (RAGLAN)",v:true}]},
+  callouts:{front:[C(300,22,"1"),C(246,262,"2"),C(220,456,"3"),C(374,186,"4")],back:[C(300,214,"5"),C(140,380,"6")]}
+};
+
+const LOOPS='<g fill="none" stroke="var(--line)" stroke-width="1.6"><rect x="214" y="58" width="8" height="34"/><rect x="262" y="58" width="8" height="34"/><rect x="330" y="58" width="8" height="34"/><rect x="378" y="58" width="8" height="34"/></g>';
+const WB=["M190 90 L410 90"];
+const TRO="M196 60 L404 60 L410 90 Q420 200 414 300 L396 600 L316 600 L304 250 L296 250 L284 600 L204 600 L186 300 Q180 200 190 90 Z";
+const TR={
+  outline:{front:TRO,back:TRO},
+  solid:{front:[...WB,"M206 92 Q220 150 190 172","M394 92 Q380 150 410 172"],back:[...WB,"M190 118 Q300 146 410 118","M300 60 L300 250","M214 170 L276 170","M324 170 L386 170"]},
+  dashed:{front:["M312 90 L312 210 Q312 232 300 242","M244 104 L244 596","M356 104 L356 596","M204 588 L284 588","M316 588 L396 588","M196 84 L404 84"],back:["M204 588 L284 588","M316 588 L396 588","M196 84 L404 84"]},
+  extra:{front:LOOPS+'<circle cx="300" cy="75" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:LOOPS+'<rect x="380" y="164" width="6" height="12" rx="1" fill="none" stroke="var(--line)" stroke-width="1.4"/>'},
+  logo:{front:null,back:[230,120,14]},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 42 (M = 32 IN)"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 104 · INSEAM 81",v:true},{x1:204,y1:620,x2:284,y2:620,t:"HEM 19",small:true}],
+        back:[{x1:430,y1:250,x2:430,y2:600,t:"INSEAM 32 IN",v:true}]},
+  callouts:{front:[C(300,75,"1"),C(198,140,"2"),C(312,190,"3"),C(244,400,"4")],back:[C(386,170,"5"),C(230,100,"6"),C(300,84,"7")]}
+};
+const SHO="M196 60 L404 60 L410 90 Q420 200 418 300 L414 430 L312 430 L304 250 L296 250 L288 430 L186 430 L182 300 Q180 200 190 90 Z";
+const SH={
+  outline:{front:SHO,back:SHO},
+  solid:{front:[...WB,"M206 92 Q220 150 190 172","M394 92 Q380 150 410 172"],back:[...WB,"M190 118 Q300 146 410 118","M300 60 L300 250","M214 170 L276 170","M324 170 L386 170"]},
+  dashed:{front:["M312 90 L312 210 Q312 232 300 242","M190 418 L288 418","M312 418 L412 418","M196 84 L404 84"],back:["M190 418 L288 418","M312 418 L412 418","M196 84 L404 84"]},
+  extra:{front:LOOPS+'<circle cx="300" cy="75" r="5" fill="none" stroke="var(--line)" stroke-width="1.6"/><rect x="198" y="112" width="12" height="22" rx="4" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:LOOPS+'<rect x="380" y="164" width="6" height="12" rx="1" fill="none" stroke="var(--line)" stroke-width="1.4"/>'},
+  logo:{front:[372,390,15],back:[230,120,14]},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 42"},{x1:548,y1:250,x2:548,y2:430,t:"INSEAM 9 IN",v:true},{x1:548,y1:60,x2:548,y2:240,t:"RISE 28",v:true,small:true}],back:[]},
+  callouts:{front:[C(204,100,"1"),C(198,170,"2"),C(372,370,"3")],back:[C(386,170,"4"),C(300,84,"5")]}
+};
+const JGO="M196 60 L404 60 L408 96 Q418 200 412 300 L380 556 L320 556 L304 250 L296 250 L280 556 L220 556 L188 300 Q182 200 192 96 Z";
+const gathers=Array.from({length:21},(_,i)=>`M${200+i*10} 64 L${200+i*10} 92`);
+const JG={
+  outline:{front:JGO,back:JGO},
+  solid:{front:["M192 96 L408 96","M220 556 L222 600 L278 600 L280 556","M320 556 L322 600 L378 600 L380 556","M290 96 L284 150","M310 96 L316 150"],back:["M192 96 L408 96","M220 556 L222 600 L278 600 L280 556","M320 556 L322 600 L378 600 L380 556","M300 96 L300 250","M324 170 L386 170"]},
+  dashed:{front:["M206 98 Q220 150 194 168","M394 98 Q380 150 406 168",...gathers],back:gathers},
+  extra:{front:'<path d="M190 100 Q184 200 190 300 L222 552" fill="none" stroke="var(--line)" stroke-width="3.5" opacity=".85"/><path d="M410 100 Q416 200 410 300 L378 552" fill="none" stroke="var(--line)" stroke-width="3.5" opacity=".85"/>',back:'<rect x="380" y="164" width="6" height="12" rx="1" fill="none" stroke="var(--line)" stroke-width="1.4"/>'},
+  logo:{front:[370,180,15],back:null},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 38 RELAXED"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 100",v:true},{x1:222,y1:620,x2:278,y2:620,t:"CUFF 13",small:true}],back:[]},
+  callouts:{front:[C(300,78,"1"),C(300,160,"2"),C(196,240,"3"),C(370,160,"4"),C(250,580,"5")],back:[C(386,170,"6")]}
+};
+const PLO="M196 60 L404 60 L412 90 Q432 220 430 320 L436 600 L316 600 L304 262 L296 262 L284 600 L164 600 L170 320 Q168 220 188 90 Z";
+const PL={
+  outline:{front:PLO,back:PLO},
+  solid:{front:[...WB,"M250 90 L254 168","M350 90 L346 168","M206 92 Q222 150 186 176","M394 92 Q378 150 414 176","M404 66 L436 66 L436 84 L404 84"],back:[...WB,"M300 60 L300 262","M222 168 L282 168","M318 168 L378 168"]},
+  dashed:{front:["M312 90 L312 214 Q312 236 300 246","M226 100 L224 596","M374 100 L376 596","M196 84 L404 84"],back:["M196 84 L404 84","M232 100 L236 160","M368 100 L364 160"]},
+  extra:{front:'<circle cx="426" cy="75" r="4" fill="none" stroke="var(--line)" stroke-width="1.4"/>',back:''},
+  logo:{front:null,back:[230,128,14]},
+  dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 42"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 104",v:true},{x1:164,y1:620,x2:284,y2:620,t:"HEM 29 WIDE",small:true}],back:[]},
+  callouts:{front:[C(250,130,"1"),C(420,48,"2"),C(226,400,"3")],back:[C(230,110,"4")]}
+};
+/* headwear & accessories */
+const CAPF="M150 400 Q150 196 300 188 Q450 196 450 400 Z";
+const CAP={
+  outline:{front:CAPF,back:"M170 404 Q176 214 330 206 Q452 214 456 404 Z"},
+  solid:{front:["M300 188 L300 400","M222 210 Q200 300 206 400","M378 210 Q400 300 394 400","M150 400 Q300 520 450 400","M150 400 Q300 436 450 400"],
+         back:["M170 404 Q100 410 54 448 Q130 444 210 424","M300 208 Q296 300 302 404","M412 224 Q440 300 446 404"]},
+  dashed:{front:["M164 410 Q300 500 436 410","M172 404 Q300 488 428 404","M152 380 Q300 410 448 380"],back:["M66 446 Q130 440 200 422","M172 384 Q300 400 454 384"]},
+  extra:{front:'<circle cx="300" cy="190" r="7" fill="none" stroke="var(--line)" stroke-width="1.6"/><circle cx="240" cy="246" r="3" fill="none" stroke="var(--line)" stroke-width="1.2"/><circle cx="360" cy="246" r="3" fill="none" stroke="var(--line)" stroke-width="1.2"/>',
+         back:'<rect x="430" y="370" width="30" height="12" fill="none" stroke="var(--line)" stroke-width="1.6"/><path d="M444 382 L452 420" stroke="var(--line)" stroke-width="2"/>'},
+  logo:{front:[300,318,82],back:null},
+  dims:{front:[{x1:150,y1:150,x2:450,y2:150,t:"CROWN WIDTH 20 · 6 PANEL"},{x1:500,y1:188,x2:500,y2:400,t:"CROWN 10.5 LOW",v:true}],back:[{x1:54,y1:480,x2:210,y2:480,t:"BRIM 7"}]},
+  callouts:{front:[C(300,170,"1"),C(300,272,"2"),C(300,476,"3")],back:[C(445,350,"4"),C(120,470,"5")]}
+};
+const SNB={
+  outline:{front:"M150 400 Q150 186 300 178 Q450 186 450 400 Z",back:"M150 400 Q150 186 300 178 Q450 186 450 400 Z"},
+  solid:{front:["M212 200 Q194 300 200 400","M388 200 Q406 300 400 400","M140 400 L460 400 L470 470 L130 470 Z"],
+         back:["M300 178 L300 400","M212 200 Q194 300 200 400","M388 200 Q406 300 400 400","M246 400 Q300 330 354 400"]},
+  dashed:{front:["M146 412 L454 412","M142 424 L458 424","M200 230 L400 230"],back:[]},
+  extra:{front:'<g fill="var(--line)" opacity=".8">'+Array.from({length:24},(_,i)=>`<circle cx="${168+(i%4)*8}" cy="${260+Math.floor(i/4)*16}" r="1.6"/><circle cx="${408+(i%4)*8}" cy="${260+Math.floor(i/4)*16}" r="1.6"/>`).join("")+'</g>',
+         back:'<rect x="230" y="372" width="140" height="18" fill="none" stroke="var(--line)" stroke-width="1.6"/>'+Array.from({length:7},(_,i)=>`<circle cx="${244+i*18}" cy="381" r="3.5" fill="none" stroke="var(--line)" stroke-width="1.2"/>`).join("")},
+  logo:{front:[300,300,74],back:null},
+  dims:{front:[{x1:130,y1:500,x2:470,y2:500,t:"FLAT BRIM 7.5"},{x1:500,y1:178,x2:500,y2:400,t:"CROWN 12 STRUCTURED",v:true}],back:[{x1:230,y1:420,x2:370,y2:420,t:"SNAP STRAP 7 POSITIONS"}]},
+  callouts:{front:[C(300,200,"1"),C(180,240,"2"),C(300,440,"3")],back:[C(300,350,"4")]}
+};
+const BKF="M200 300 L220 196 Q300 182 380 196 L400 300 Z";
+const BK={
+  outline:{front:BKF,back:BKF},
+  solid:{front:["M200 300 L116 372 Q300 410 484 372 L400 300","M200 300 Q300 312 400 300"],back:["M200 300 L116 372 Q300 410 484 372 L400 300","M200 300 Q300 312 400 300","M300 186 L300 304"]},
+  dashed:{front:["M132 364 Q300 398 468 364","M150 352 Q300 386 450 352","M168 340 Q300 372 432 340","M296 380 L292 460","M304 380 L308 460"],back:["M132 364 Q300 398 468 364","M150 352 Q300 386 450 352"]},
+  extra:{front:'<circle cx="236" cy="232" r="5" fill="none" stroke="var(--line)" stroke-width="1.4"/><circle cx="364" cy="232" r="5" fill="none" stroke="var(--line)" stroke-width="1.4"/><rect x="290" y="458" width="20" height="14" rx="4" fill="none" stroke="var(--line)" stroke-width="1.6"/>',back:''},
+  logo:{front:[300,252,56],back:null},
+  dims:{front:[{x1:116,y1:420,x2:484,y2:420,t:"BRIM 6 ALL ROUND"},{x1:500,y1:190,x2:500,y2:300,t:"CROWN 9",v:true}],back:[]},
+  callouts:{front:[C(236,212,"1"),C(300,226,"2"),C(150,330,"3"),C(318,466,"4")],back:[]}
+};
+const BNO="M200 430 L200 270 Q200 160 300 150 Q400 160 400 270 L400 430 Z";
+const BN={
+  outline:{front:BNO,back:BNO},
+  solid:{front:["M200 340 L400 340"],back:["M200 340 L400 340"]},
+  dashed:{front:Array.from({length:19},(_,i)=>`M${210+i*10} 344 L${210+i*10} 426`),back:Array.from({length:19},(_,i)=>`M${210+i*10} 344 L${210+i*10} 426`)},
+  extra:{front:'<rect x="200" y="372" width="200" height="12" fill="var(--line)" opacity=".85"/><rect x="282" y="390" width="36" height="28" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="1.4"/>',back:'<rect x="200" y="372" width="200" height="12" fill="var(--line)" opacity=".85"/>'},
+  logo:{front:[300,404,18],back:null},
+  dims:{front:[{x1:200,y1:460,x2:400,y2:460,t:"FLAT WIDTH 21"},{x1:440,y1:150,x2:440,y2:430,t:"HEIGHT 23 · CUFF 9",v:true}],back:[]},
+  callouts:{front:[C(300,130,"1"),C(420,378,"2"),C(340,404,"3")],back:[]}
+};
+const GLO="M230 600 L226 360 L212 222 Q212 200 230 200 Q248 200 250 222 L258 340 L264 178 Q266 156 284 156 Q302 156 302 178 L306 330 L316 168 Q318 148 336 148 Q354 148 354 170 L352 330 L366 202 Q368 184 386 186 Q402 188 400 208 L390 370 Q420 336 448 324 Q470 318 474 336 Q472 352 444 384 L404 470 L394 600 Z";
+const GL={
+  outline:{front:GLO,back:GLO},
+  solid:{front:["M230 470 L398 470"],back:["M230 470 L398 470"]},
+  dashed:{front:["M246 300 L266 290 L286 300 L306 290 L326 300 L346 290 L366 300 L386 292","M232 590 L392 590"],back:["M232 590 L392 590","M250 380 Q300 420 380 390"]},
+  extra:{front:'<circle cx="300" cy="530" r="44" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="2"/><circle cx="300" cy="530" r="36" fill="none" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/><g fill="var(--line)" opacity=".8">'+[[231,240],[231,256],[231,272],[283,210],[283,226],[283,242],[335,200],[335,216],[335,232],[383,236],[383,252],[383,268]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.8"/>`).join("")+'</g>',
+         back:'<g fill="var(--line)" opacity=".8">'+[[231,240],[231,256],[283,210],[283,226],[335,200],[335,216],[383,236],[383,252]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.8"/>`).join("")+'</g>'},
+  logo:{front:[300,530,40],back:null},
+  dims:{front:[{x1:510,y1:148,x2:510,y2:600,t:"LENGTH 25 (SIZE M)",v:true}],back:[]},
+  callouts:{front:[C(306,282,"1"),C(356,530,"2"),C(300,450,"3")],back:[C(300,398,"4")]}
+};
+const TWO="M200 80 L400 80 L400 580 L200 580 Z";
+const TW={
+  outline:{front:TWO,back:TWO},
+  solid:{front:["M300 80 L300 124"],back:["M300 80 L300 124"]},
+  dashed:{front:["M208 88 L392 88 L392 572 L208 572 Z"],back:["M208 88 L392 88 L392 572 L208 572 Z"]},
+  extra:{front:'<rect x="200" y="80" width="200" height="500" fill="url(#openknit)"/><rect x="200" y="98" width="200" height="10" fill="var(--line)" opacity=".85"/><rect x="200" y="552" width="200" height="10" fill="var(--line)" opacity=".85"/><ellipse cx="300" cy="60" rx="12" ry="22" fill="none" stroke="var(--line)" stroke-width="2.4"/>',
+         back:'<rect x="200" y="80" width="200" height="500" fill="url(#openknit)"/><rect x="200" y="98" width="200" height="10" fill="var(--line)" opacity=".85"/><rect x="200" y="552" width="200" height="10" fill="var(--line)" opacity=".85"/>'},
+  logo:{front:[300,508,50],back:null},
+  dims:{front:[{x1:200,y1:610,x2:400,y2:610,t:"WIDTH 40"},{x1:440,y1:80,x2:440,y2:580,t:"LENGTH 100",v:true}],back:[]},
+  callouts:{front:[C(320,60,"1"),C(300,140,"2"),C(420,103,"3"),C(340,508,"4")],back:[]}
+};
+const SKO="M240 100 L340 100 L340 400 Q342 470 400 500 L480 530 Q512 546 502 576 Q492 600 452 596 L310 580 Q250 570 242 520 Z";
+const SK={
+  outline:{front:SKO,back:SKO},
+  solid:{front:["M240 170 L340 170"],back:["M240 170 L340 170"]},
+  dashed:{front:[...Array.from({length:9},(_,i)=>`M${250+i*10} 104 L${250+i*10} 166`),"M244 500 Q270 470 300 470","M440 512 Q460 560 450 592"],back:["M248 300 L332 300 L332 560 L260 556 Z","M244 500 Q270 470 300 470"]},
+  extra:{front:'<rect x="240" y="120" width="100" height="8" fill="var(--line)" opacity=".85"/><rect x="240" y="138" width="100" height="8" fill="var(--line)" opacity=".85"/>',back:'<rect x="240" y="120" width="100" height="8" fill="var(--line)" opacity=".85"/><rect x="240" y="138" width="100" height="8" fill="var(--line)" opacity=".85"/><rect x="250" y="320" width="80" height="230" fill="url(#mesh)"/>'},
+  logo:{front:[300,330,36],back:null},
+  dims:{front:[{x1:200,y1:100,x2:200,y2:520,t:"LEG 22 · CREW",v:true}],back:[]},
+  callouts:{front:[C(360,132,"1"),C(300,300,"2"),C(270,480,"3")],back:[C(290,430,"4")]}
+};
+const hc=(cx,w,h)=>`M${cx-w/2} 600 L${cx-w/2} ${600-h*.55} Q${cx-w/2} ${600-h} ${cx} ${600-h} Q${cx+w/2} ${600-h} ${cx+w/2} ${600-h*.55} L${cx+w/2} 600 Z`;
+const HCD=hc(140,170,430)+" "+hc(318,140,350)+" "+hc(472,118,300);
+const HC={
+  outline:{front:HCD,back:HCD},
+  solid:{front:["M56 588 L224 588","M248 588 L388 588","M413 588 L531 588"],back:["M56 588 L224 588","M248 588 L388 588","M413 588 L531 588","M140 170 L140 588","M318 250 L318 588","M472 300 L472 588"]},
+  dashed:{front:[hc(140,154,414),hc(318,124,334),hc(472,102,284)],back:[]},
+  extra:{front:[[140,170,"1"],[318,250,"3"],[472,300,"H"]].map(([x,y,t])=>`<rect x="${x-12}" y="${y-28}" width="24" height="20" rx="3" fill="none" stroke="var(--line)" stroke-width="1.4"/><text x="${x}" y="${y-13}" fill="var(--line)" font-family="var(--mono)" font-size="12" text-anchor="middle">${t}</text>`).join(""),back:''},
+  logo:{front:null,back:null},
+  dims:{front:[{x1:56,y1:630,x2:224,y2:630,t:"DRIVER 16 × 43",small:true},{x1:248,y1:630,x2:388,y2:630,t:"FW 13 × 35",small:true},{x1:413,y1:630,x2:531,y2:630,t:"HYB 11 × 30",small:true}],back:[]},
+  callouts:{front:[C(140,140,"1"),C(60,400,"2"),C(318,440,"3")],back:[C(140,400,"4")]}
+};
+HC.extra.front+=['<use href="#logo" fill="var(--line)" transform="translate(95 330) scale(.35)"/>','<use href="#logo" fill="var(--line)" transform="translate(283 390) scale(.27)"/>','<use href="#logo" fill="var(--line)" transform="translate(442 430) scale(.23)"/>'].join("");
+const BGO="M220 130 L380 130 L394 600 L206 600 Z";
+const BG={
+  outline:{front:BGO,back:BGO},
+  solid:{front:["M206 92 L394 92 L384 140 L216 140 Z","M232 300 L368 300 L374 530 L226 530 Z","M226 200 L150 640","M374 200 L450 640","M206 600 Q300 620 394 600"],
+         back:["M206 92 L394 92 L384 140 L216 140 Z","M246 150 Q196 300 250 440","M354 150 Q404 300 350 440","M270 150 Q226 300 270 440","M330 150 Q374 300 330 440","M226 200 L150 640","M374 200 L450 640"]},
+  dashed:{front:["M240 310 L360 310","M380 200 L390 480","M300 92 L300 140","M228 92 L236 140","M372 92 L364 140"],back:["M300 92 L300 140"]},
+  extra:{front:'<g stroke="var(--line)" stroke-width="5" opacity=".85"><path d="M178 480 L170 528"/><path d="M422 480 L430 528"/></g><rect x="380" y="180" width="16" height="70" rx="3" fill="none" stroke="var(--line)" stroke-width="1.4"/>',back:'<g stroke="var(--line)" stroke-width="5" opacity=".85"><path d="M178 480 L170 528"/><path d="M422 480 L430 528"/></g>'},
+  logo:{front:[300,412,110],back:null},
+  dims:{front:[{x1:206,y1:70,x2:394,y2:70,t:"TOP 23 · 14-WAY"},{x1:470,y1:92,x2:470,y2:600,t:"HEIGHT 89 · 2.2 KG",v:true}],back:[]},
+  callouts:{front:[C(300,116,"1"),C(300,320,"2"),C(388,215,"3"),C(174,504,"4")],back:[C(220,300,"5")]}
+};
+
+const WSH="M254 96 L184 112 Q140 140 120 196 L160 220 Q176 206 196 200 Q186 300 204 360 Q196 470 200 560 Q300 572 400 560 Q404 470 396 360 Q414 300 404 200 Q424 206 440 220 L480 196 Q460 140 416 112 L346 96 ";
+const WPOL={
+  outline:{front:WSH+"Q300 126 254 96 Z",back:WSH+"Q300 104 254 96 Z"},
+  solid:{front:["M254 96 Q300 66 346 96","M254 96 L264 150 L298 122","M346 96 L336 150 L302 122","M259 100 L268 144","M341 100 L332 144","M126 186 L166 210","M120 194 L160 218","M474 186 L434 210","M480 194 L440 218"],
+         back:["M254 96 Q300 82 346 96","M126 186 L166 210","M474 186 L434 210"]},
+  dashed:{front:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M202 548 Q300 560 398 548","M290 122 L290 196","M310 122 L310 196"],back:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M202 548 Q300 560 398 548"]},
+  extra:{front:'<circle cx="300" cy="144" r="4" fill="none" stroke="var(--line)" stroke-width="1.5"/><circle cx="300" cy="174" r="4" fill="none" stroke="var(--line)" stroke-width="1.5"/>',back:''},
+  logo:{front:[342,176,19],back:null},
+  dims:{front:[{x1:196,y1:236,x2:404,y2:236,t:"½ BUST 46"},{x1:204,y1:360,x2:396,y2:360,t:"½ WAIST 42"},{x1:548,y1:96,x2:548,y2:564,t:"LENGTH 60 (HPS)",v:true}],back:[{x1:200,y1:600,x2:400,y2:600,t:"½ HEM 47"}]},
+  callouts:{front:[C(300,76,"1"),C(370,176,"2"),C(144,206,"3"),C(300,560,"4")],back:[C(300,360,"5")]}
+};
+const SLO="M256 96 L216 104 Q226 170 200 218 Q186 300 204 360 Q196 470 200 560 Q300 572 400 560 Q404 470 396 360 Q414 300 400 218 Q374 170 384 104 L344 96 ";
+const WSL={
+  outline:{front:SLO+"Q300 126 256 96 Z",back:SLO+"Q300 104 256 96 Z"},
+  solid:{front:["M256 96 Q300 66 344 96","M256 96 L266 150 L298 122","M344 96 L334 150 L302 122","M226 106 Q236 172 210 220","M374 106 Q364 172 390 220"],back:["M256 96 Q300 82 344 96","M226 106 Q236 172 210 220","M374 106 Q364 172 390 220"]},
+  dashed:{front:["M300 122 L300 196","M202 548 Q300 560 398 548"],back:["M202 548 Q300 560 398 548"]},
+  extra:{front:'',back:''},
+  logo:{front:[342,176,19],back:null},
+  dims:{front:[{x1:204,y1:250,x2:396,y2:250,t:"½ BUST 45"},{x1:548,y1:96,x2:548,y2:564,t:"LENGTH 59 (HPS)",v:true}],back:[]},
+  callouts:{front:[C(300,76,"1"),C(230,160,"2"),C(300,210,"3"),C(370,176,"4")],back:[]}
+};
+const DRO="M254 96 L184 112 Q140 140 120 196 L160 220 Q176 206 196 200 Q186 300 204 340 L168 640 Q300 656 432 640 L396 340 Q414 300 404 200 Q424 206 440 220 L480 196 Q460 140 416 112 L346 96 ";
+const WDR={
+  outline:{front:DRO+"Q300 126 254 96 Z",back:DRO+"Q300 104 254 96 Z"},
+  solid:{front:[...WPOL.solid.front,"M172 622 Q300 638 428 622"],back:[...WPOL.solid.back,"M172 622 Q300 638 428 622"]},
+  dashed:{front:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M204 340 Q300 352 396 340","M290 122 L290 214","M310 122 L310 214","M186 470 Q300 484 414 470"],back:["M184 112 Q198 160 196 200","M416 112 Q402 160 404 200","M204 340 Q300 352 396 340"]},
+  extra:{front:'<g fill="none" stroke="var(--line)" stroke-width="1.5"><circle cx="300" cy="144" r="4"/><circle cx="300" cy="172" r="4"/><circle cx="300" cy="200" r="4"/></g>',back:''},
+  logo:{front:[342,176,19],back:null},
+  dims:{front:[{x1:204,y1:340,x2:396,y2:340,t:"½ WAIST 38",above:true},{x1:548,y1:96,x2:548,y2:648,t:"LENGTH 88 (HPS)",v:true}],back:[{x1:168,y1:670,x2:432,y2:670,t:"½ HEM 60"}]},
+  callouts:{front:[C(300,76,"1"),C(320,206,"2"),C(300,470,"3"),C(300,630,"4")],back:[C(300,340,"5")]}
+};
+const SKO2="M200 80 L400 80 L404 112 L432 400 Q300 410 168 400 L196 112 Z";
+const WSK={
+  outline:{front:SKO2,back:SKO2},
+  solid:{front:["M196 112 L404 112","M250 112 L232 404","M350 112 L368 404"],back:["M196 112 L404 112",...Array.from({length:9},(_,i)=>`M${214+i*22} 140 L${206+i*24} 404`)]},
+  dashed:{front:["M200 106 L400 106","M206 94 Q230 130 200 150","M188 380 L412 380","M220 404 L222 430 L290 432 L298 404","M302 404 L310 432 L378 430 L380 404"],back:["M200 106 L400 106","M188 380 L412 380","M214 140 L386 140"]},
+  extra:{front:'<rect x="392" y="150" width="6" height="40" rx="2" fill="none" stroke="var(--line)" stroke-width="1.4"/>',back:''},
+  logo:{front:[372,360,15],back:null},
+  dims:{front:[{x1:200,y1:60,x2:400,y2:60,t:"½ WAIST 36"},{x1:470,y1:80,x2:470,y2:404,t:"LENGTH 41",v:true}],back:[{x1:168,y1:440,x2:432,y2:440,t:"½ HEM 62 · KNIFE PLEATS 3 CM"}]},
+  callouts:{front:[C(300,96,"1"),C(395,212,"2"),C(372,340,"3"),C(260,440,"4")],back:[C(300,250,"5")]}
+};
+const VZ={
+  outline:{front:"M170 300 Q300 272 430 300 L430 336 Q300 310 170 336 Z",back:"M150 320 Q300 300 450 320 L450 354 Q300 336 150 354 Z"},
+  solid:{front:["M170 336 Q300 470 430 336","M170 336 Q300 372 430 336"],back:["M248 324 L352 324 L352 350 L248 350 Z"]},
+  dashed:{front:["M184 344 Q300 456 416 344","M176 304 Q300 278 424 304"],back:["M156 336 Q300 318 444 336"]},
+  extra:{front:'',back:''},
+  logo:{front:[300,322,30],back:null},
+  dims:{front:[{x1:170,y1:500,x2:430,y2:500,t:"BRIM 7 CURVED"},{x1:460,y1:300,x2:460,y2:336,t:"BAND 4.5",v:true,small:true}],back:[{x1:248,y1:380,x2:352,y2:380,t:"VELCRO ADJUST 53-59"}]},
+  callouts:{front:[C(300,290,"1"),C(300,430,"2")],back:[C(300,300,"3")]}
+};
+const W_TR={...TR,dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 36 (S)"},{x1:548,y1:60,x2:548,y2:600,t:"INSEAM 71 · HIGH RISE",v:true}],back:[]}};
+const W_QZ={...QZ,dims:{front:[{x1:192,y1:300,x2:408,y2:300,t:"½ BUST 47 (S)",above:true},{x1:548,y1:96,x2:548,y2:600,t:"LENGTH 58 CROPPED",v:true}],back:[]}};
+const W_VS={...VS,dims:{front:[{x1:194,y1:300,x2:406,y2:300,t:"½ BUST 46 (S)",above:true},{x1:548,y1:90,x2:548,y2:600,t:"LENGTH 58",v:true}],back:[]}};
+const J_POL={...POLO,dims:{front:[{x1:188,y1:262,x2:412,y2:262,t:"½ CHEST 37 (AGE 10)"},{x1:548,y1:92,x2:548,y2:604,t:"LENGTH 51 (HPS)",v:true}],back:[]}};
+const J_QZ={...QZ,dims:{front:[{x1:192,y1:300,x2:408,y2:300,t:"½ CHEST 39 (AGE 10)",above:true},{x1:548,y1:96,x2:548,y2:600,t:"LENGTH 50",v:true}],back:[]}};
+const J_SH={...SH,dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 29.5 (AGE 10)"},{x1:548,y1:250,x2:548,y2:430,t:"INSEAM 7 IN",v:true}],back:[]}};
+const J_JG={...JG,dims:{front:[{x1:196,y1:40,x2:404,y2:40,t:"½ WAIST 30 (AGE 10)"},{x1:548,y1:60,x2:548,y2:600,t:"OUTSEAM 80",v:true}],back:[]}};
+const J_CP={...CAP,dims:{front:[{x1:150,y1:150,x2:450,y2:150,t:"FITS 50-55 CM"},{x1:500,y1:188,x2:500,y2:400,t:"CROWN 9.5",v:true}],back:[]}};
+const J_GL={...GL,dims:{front:[{x1:510,y1:148,x2:510,y2:600,t:"AGE 7-9 · LENGTH 19",v:true}],back:[]}};
+const SHEETS=[
+  {id:"sg-pol-01",colors:"Black · White · Stone · Fog",x:0,y:0,style:"SG-POL-01",name:"Tour Polo",rev:"B",fabric:"180 gsm stretch pique, 88/12 rPET/elastane",size:"M (sample)",g:POLO,
+   items:["Self-fabric knit collar with 3 mm stripe tipping","Wave-S logo, tonal embroidery, 50 mm, left chest","3-button placket 30 x 115 mm, matte horn buttons","Rib sleeve cuff 25 mm with stripe tipping","Straight hem 20 mm coverstitch, 30 mm side vents","Back yoke with centre box pleat for swing room","Back hem 2 cm longer than front; UPF 50, wicking"]},
+  {id:"sg-pol-02",colors:"White/Black · Stone/Black · Black/White",x:1520,y:0,style:"SG-POL-02",name:"Tipped Knit Polo",rev:"A",fabric:"12-gauge cotton-modal knit, fully fashioned",size:"M (sample)",g:KNIT,
+   items:["Fully fashioned rib collar, double stripe tipping","2-button placket, 24 x 84 mm","Wave-S logo, tonal embroidery, 50 mm, left chest","Rib cuffs with double stripe tipping","35 mm rib hem band with double stripe, no vents","Oversized wave-S knitted tonal into back, 200 mm"]},
+  {id:"sg-pol-03",colors:"Black · White · Fairway Green",x:3040,y:0,style:"SG-POL-03",name:"Mesh-Back Tech Polo",rev:"A",fabric:"150 gsm cool-touch poly jersey; open mesh back",size:"M (sample)",g:MESH,
+   items:["Lay-flat self collar, stays down in wind","Raglan sleeve with bonded stripe tape on seams","Hidden snap placket, no visible buttons","Laser-cut vent holes under each arm","Wave-S logo, heat-transfer, 45 mm, left chest","Open mesh back panel 40 x 41 cm for airflow"]},
+  {id:"sg-pol-04",colors:"Black · Stone · Deep Navy",x:4560,y:0,style:"SG-POL-04",name:"Long Sleeve Tour Polo",rev:"A",fabric:"200 gsm brushed stretch pique",size:"M (sample)",g:LSP,
+   items:["Self-fabric collar with stripe tipping","Wave-S logo, tonal embroidery, 50 mm, left chest","3-button placket, matte horn buttons","40 mm rib cuff with stripe; stays put at address","Back yoke with box pleat, same block as Tour Polo"]},
+  {id:"sg-pol-05",colors:"Stone · White · Clay",x:6080,y:0,style:"SG-POL-05",name:"Open-Knit Resort Polo",rev:"A",fabric:"Open-knit viscose / cotton blend",size:"M (sample)",g:RESORT,
+   items:["Camp collar that lies flat open","2-button placket, short and relaxed","Knitted horizontal stripe band at hem","Woven wave-S label, 35 mm, left chest","Boxy body with 6 cm dropped shoulder, open-knit all over"]},
+  {id:"sg-kn-01",x:0,y:1120,style:"SG-KN-01",name:"Club Rugby Knit",rev:"A",fabric:"12-gauge 100% cotton, fully fashioned",colors:"Navy/White · Black/Stone · Green/White",size:"M (sample)",g:KN1,
+   items:["Structured polo collar in contrast colour","25 cm zip neck, matte zip pull","Wave-S logo, tonal embroidery, 50 mm, left chest","Three-stripe knitted chest band, front and back","Rib cuffs and 30 mm rib hem","Full stripe band continues across the back"]},
+  {id:"sg-kn-02",x:1520,y:1120,style:"SG-KN-02",name:"Split Crew Sweater",rev:"A",fabric:"12-gauge wool-cashmere 90/10",colors:"Black/Stone · Fog/White · Clay/Stone",size:"M (sample)",g:KN2,
+   items:["Rib crewneck, 20 mm","Intarsia colour break that follows the wave-S curve","Rib cuffs","30 mm rib hem","Colour break mirrored on the back; no printed logo"]},
+  {id:"sg-kn-03",x:3040,y:1120,style:"SG-KN-03",name:"Merino Quarter-Zip Knit",rev:"A",fabric:"14-gauge extra-fine merino",colors:"Black · Fog Grey · Deep Navy",size:"M (sample)",g:KN3,
+   items:["Mock neck, 50 mm","Raglan sleeve, linked seams","Wave-S logo, tonal embroidery, 50 mm, left chest","Stripe tipping at zip edges and double-stripe cuffs","Raglan back; packs small in a golf bag"]},
+  {id:"sg-kn-04",x:4560,y:1120,style:"SG-KN-04",name:"Stripe Knit Vest",rev:"A",fabric:"7-gauge cotton-wool",colors:"Stone/Black · Black/White",size:"M (sample)",g:KN4,
+   items:["V-neck rib with knitted stripe","Deep 26 cm armholes for a free swing","Wave-S logo, tonal embroidery, 50 mm, left chest","Double-stripe rib hem"]},
+  {id:"sg-qz-01",x:0,y:2240,style:"SG-QZ-01",name:"Range Quarter-Zip",rev:"A",fabric:"260 gsm brushed-back jersey",colors:"Fog Grey · Black · Stone",size:"M (sample)",g:QZ,
+   items:["Mock-neck collar stand, 55 mm","Matte black coil zip, 250 mm, garage at top","Wave-S logo, tonal embroidery, 50 mm, left chest","Rib cuffs, 60 mm","Rib hem band, 50 mm","Centre back seam, flatlocked","Set-in sleeve, armhole flatlocked"]},
+  {id:"sg-ws-01",x:1520,y:2240,style:"SG-WS-01",name:"Range Windshirt",rev:"A",fabric:"90 gsm stretch nylon, DWR",colors:"Stone · Black · Fairway Green",size:"M (sample)",g:WS,
+   items:["High stand collar, 50 mm","Zipped chest pocket; shirt packs into it","Wave-S logo, tonal embroidery, 50 mm, left chest","Drawcord hem with toggles","Perforated stripe vent band across back yoke"]},
+  {id:"sg-hd-01",x:3040,y:2240,style:"SG-HD-01",name:"Washed Stripe Hoodie",rev:"A",fabric:"380 gsm garment-dyed cotton fleece",colors:"Washed Black · Stone · Fairway Green",size:"M (sample)",g:HD,
+   items:["Self-lined hood, flat drawcords","Flat drawcords, metal tips","Kangaroo pocket","Stripe-cut rib hem band","Tonal wave-S back graphic, 280 mm"]},
+  {id:"sg-cr-01",x:4560,y:2240,style:"SG-CR-01",name:"Heavyweight Crew",rev:"A",fabric:"380 gsm cotton fleece",colors:"Fog Grey · Black · White",size:"M (sample)",g:CR,
+   items:["Rib crewneck with knitted stripe insert","Wave-S logo, tonal embroidery, 50 mm, left chest","Dropped shoulder, rib cuffs","Rib hem, coverstitched"]},
+  {id:"sg-vs-01",x:6080,y:2240,style:"SG-VS-01",name:"Reversible Quilted Vest",rev:"A",fabric:"20D nylon both faces, 100 gsm recycled fill",colors:"Black/Stone · Navy/Fog",size:"M (sample)",g:VS,
+   items:["Stand collar, 40 mm","Two-way reversible zip","Welt hand pockets on both faces","Wave-S logo on quilted face; flat face carries it too","Wave-pattern quilting, 9 cm repeat"]},
+  {id:"sg-jk-01",x:7600,y:2240,style:"SG-JK-01",name:"Weather Shell Jacket",rev:"A",fabric:"2.5-layer stretch shell, 20K/20K, taped",colors:"Black · Stone",size:"M (sample)",g:JK,
+   items:["Tall collar; hood stows inside","Waterproof chest zip pocket (phone)","Waterproof hand pocket zips","Wave-S logo, reflective print, 50 mm, left chest","Back yoke vent with storm flap","Articulated elbows; quiet fabric, no rustle in the swing"]}
+  ,{id:"sg-tr-01",x:0,y:3360,style:"SG-TR-01",name:"Tour Trouser",rev:"A",fabric:"220 gsm 4-way stretch twill, DWR",colors:"Stone · Black · Fog Grey",size:"M (sample)",g:TR,
+   items:["Extended waistband with button and hidden hook","Slash front pockets, deep for balls and tees","Fly with YKK zip","Pressed crease, tapered leg","Zipped back pocket for phone (right)","Small wave-S embroidery above left back pocket","Silicone gripper and stripe tape inside waistband"]}
+  ,{id:"sg-sh-01",x:1520,y:3360,style:"SG-SH-01",name:"Tour Short",rev:"A",fabric:"Same twill as Tour Trouser",colors:"Stone · Black · White",size:"M (sample)",g:SH,
+   items:["Tee loop on right front pocket","Slash pockets, ball-safe depth","Wave-S embroidery 35 mm at left hem","Zipped back pocket for phone","Silicone waist gripper with stripe tape"]}
+  ,{id:"sg-jg-01",x:3040,y:3360,style:"SG-JG-01",name:"Clubhouse Jogger",rev:"A",fabric:"280 gsm double-knit stretch",colors:"Black · Fog Grey",size:"M (sample)",g:JG,
+   items:["Elastic waist, gathered, inner drawcord","Flat drawcords, metal tips","5 mm stripe piping down each side seam","Wave-S embroidery 35 mm, left thigh","Rib cuffs 13 cm","Zipped back pocket"]}
+  ,{id:"sg-pl-01",x:4560,y:3360,style:"SG-PL-01",name:"Pleated Wide Trouser",rev:"A",fabric:"260 gsm Tencel-blend twill",colors:"Stone · Deep Navy · Black",size:"M (sample)",g:PL,
+   items:["Single forward pleat each side","Extended tab waist with button","Pressed crease, wide straight leg","Wave-S embroidery above left back pocket"]}
+  ,{id:"sg-cp-01",x:0,y:4480,style:"SG-CP-01",name:"Unstructured Cap",rev:"A",fabric:"Washed cotton twill",colors:"Stone · Black · White · Green",size:"M (sample)",g:CAP,labels:["FRONT VIEW","SIDE VIEW"],
+   items:["Self-fabric top button","3D puff wave-S, 55 mm, front","Curved brim with stripe binding at edge","Strap-back with metal slider","Brim 7 cm, low 10.5 cm crown"]}
+  ,{id:"sg-cp-02",x:1520,y:4480,style:"SG-CP-02",name:"Tour Snapback",rev:"A",fabric:"Performance poly, perforated sides",colors:"Black · White",size:"M (sample)",g:SNB,labels:["FRONT VIEW","BACK VIEW"],
+   items:["Structured 5-panel front, no centre seam","Laser-perforated side panels","Flat brim with stripe stitch rows","Snap strap, 7 positions"]}
+  ,{id:"sg-bk-01",x:3040,y:4480,style:"SG-BK-01",name:"Bucket Hat",rev:"A",fabric:"Ripstop nylon, DWR, UPF 50",colors:"Stone · Black",size:"M (sample)",g:BK,
+   items:["Metal eyelet vents","Wave-S embroidery, 40 mm","Stripe stitching rows on 6 cm brim","Chin cord with toggle; packable"]}
+  ,{id:"sg-bn-01",x:4560,y:4480,style:"SG-BN-01",name:"Stripe Beanie",rev:"A",fabric:"Merino blend rib knit",colors:"Black/Stone · Fog/White",size:"M (sample)",g:BN,
+   items:["Rounded crown, fine rib","Knitted stripe band in cuff","Woven wave-S label on cuff"]}
+  ,{id:"sg-gl-01",x:6080,y:4480,style:"SG-GL-01",name:"Cabretta Glove",rev:"A",fabric:"AAA cabretta palm, Lycra knuckles",colors:"White · Black",size:"M (sample)",g:GL,labels:["BACK OF HAND","PALM"],
+   items:["Stretch knuckle band","Round tab with magnetic ball marker printed with wave-S","Stripe perforation rows on fingers","Palm patch reinforced (palm view)"]}
+  ,{id:"sg-tw-01",x:7600,y:4480,style:"SG-TW-01",name:"Waffle Caddy Towel",rev:"A",fabric:"Cotton waffle weave, 40 × 100 cm",colors:"Black · Stone",size:"M (sample)",g:TW,labels:["FLAT FRONT","FLAT BACK"],
+   items:["Metal carabiner clip","Centre slit to hang from bag","Woven stripe borders at both ends","White embroidered wave-S near hem"]}
+  ,{id:"sg-sk-01",x:9120,y:4480,style:"SG-SK-01",name:"Stripe Crew Sock",rev:"A",fabric:"Combed cotton/nylon, cushioned sole",colors:"White · Black · Stone (3-pack)",size:"M (sample)",g:SK,labels:["OUTER SIDE","INNER SIDE"],
+   items:["Rib cuff with two knitted stripes","Knitted wave-S at ankle","Reinforced Y-heel and toe","Cushioned blister zone (inner view)"]}
+  ,{id:"sg-hc-01",x:10640,y:4480,style:"SG-HC-01",name:"Headcover Set",rev:"A",fabric:"Off-white PU leather, fleece-lined",colors:"Off-White/Black · Black/Stone",size:"M (sample)",g:HC,
+   items:["Number tags: 1, 3, H","Black piping stripe down both sides","Large embroidered wave-S on each cover","Centre back seam"]}
+  ,{id:"sg-bg-01",x:12160,y:4480,style:"SG-BG-01",name:"Stand Bag",rev:"A",fabric:"Matte recycled nylon ripstop, 2.2 kg",colors:"Black · Stone",size:"M (sample)",g:BG,
+   items:["14-way top with full-length dividers","Main pocket with large white wave-S","Magnetic rangefinder pocket","Reflective stripe tape on stand legs","Dual carry straps (back view)"]}
+  ,{id:"sg-w-pol-01",x:0,y:5600,style:"SG-W-POL-01",name:"Women's Tour Polo",rev:"A",fabric:"170 gsm stretch pique",colors:"White · Black · Stone · Clay",size:"S (sample)",g:WPOL,
+   items:["Self collar with stripe tipping","Wave-S 45 mm, tonal embroidery","Short cap sleeve with stripe cuff","Longer back hem, 2.5 cm side vents","Shaped waist (back view)"]}
+  ,{id:"sg-w-pol-02",x:1520,y:5600,style:"SG-W-POL-02",name:"Sleeveless Polo",rev:"A",fabric:"160 gsm stretch pique",colors:"White · Black · Green",size:"S (sample)",g:WSL,
+   items:["Self collar","Racer-cut armhole with stripe binding","Hidden snap placket","Wave-S 45 mm, tonal embroidery"]}
+  ,{id:"sg-w-dr-01",x:3040,y:5600,style:"SG-W-DR-01",name:"Polo Dress",rev:"A",fabric:"180 gsm stretch jersey",colors:"Black · White · Stone",size:"S (sample)",g:WDR,
+   items:["Knit collar with stripe tipping","3-snap placket, wave-S 45 mm","Built-in shorts with ball pocket (dashed)","Stripe tipping at hem","Waist seam, A-line skirt"]}
+  ,{id:"sg-w-sk-01",x:4560,y:5600,style:"SG-W-SK-01",name:"Pleated Skort",rev:"A",fabric:"200 gsm 4-way stretch woven, DWR",colors:"Black · White · Stone · Navy",size:"S (sample)",g:WSK,
+   items:["Waistband with silicone gripper and stripe tape","Zipped phone pocket at right hip","Wave-S 35 mm at left hem","Inner shorts with ball pockets (dashed)","Knife pleats at back and sides"]}
+  ,{id:"sg-w-tr-01",x:6080,y:5600,style:"SG-W-TR-01",name:"Women's Ankle Trouser",rev:"A",fabric:"220 gsm 4-way stretch twill",colors:"Black · Stone",size:"S (sample)",g:W_TR,
+   items:["High-rise waistband, button and hook","Slash pockets","Fly with YKK zip","Slim ankle-length leg, pressed crease","Zipped back pocket","Wave-S above back pocket","Waist gripper with stripe tape"]}
+  ,{id:"sg-w-qz-01",x:7600,y:5600,style:"SG-W-QZ-01",name:"Women's Quarter-Zip",rev:"A",fabric:"240 gsm brushed-back stretch jersey",colors:"Fog Grey · Black · Clay",size:"S (sample)",g:W_QZ,
+   items:["Mock neck, zip garage","Zip with stripe tipping","Wave-S 45 mm, tonal embroidery","Rib cuffs with thumb holes","Cropped length to sit over skort","Shaped side seams"]}
+  ,{id:"sg-w-vs-01",x:9120,y:5600,style:"SG-W-VS-01",name:"Women's Quilted Vest",rev:"A",fabric:"20D nylon, 80 gsm recycled fill",colors:"Black · Stone",size:"S (sample)",g:W_VS,
+   items:["Stand collar","Two-way zip","Welt pockets","Wave-S 45 mm","Wave-pattern quilting, shaped princess seams"]}
+  ,{id:"sg-w-vz-01",x:10640,y:5600,style:"SG-W-VZ-01",name:"Visor",rev:"A",fabric:"Performance poly twill",colors:"White · Black · Stone",size:"S (sample)",g:VZ,labels:["FRONT VIEW","BACK VIEW"],
+   items:["3D puff wave-S 45 mm on band","Curved 7 cm brim with stripe binding","Velcro back, ponytail friendly"]}
+  ,{id:"sg-j-pol-01",x:0,y:6720,style:"SG-J-POL-01",name:"Junior Tour Polo",rev:"A",fabric:"160 gsm stretch pique",colors:"White · Black · Green",size:"Age 10 (sample)",g:J_POL,
+   items:["Self collar with stripe tipping","Wave-S 35 mm","2-button placket, 18L buttons","Stripe cuffs","Hem coverstitch, no vents under age 8"]}
+  ,{id:"sg-j-qz-01",x:1520,y:6720,style:"SG-J-QZ-01",name:"Junior Quarter-Zip",rev:"A",fabric:"240 gsm brushed-back jersey",colors:"Fog Grey · Black",size:"Age 10 (sample)",g:J_QZ,
+   items:["Mock neck with zip garage","Easy-pull zip","Wave-S 35 mm","Rib cuffs, no thumb holes","Rib hem"]}
+  ,{id:"sg-j-sh-01",x:3040,y:6720,style:"SG-J-SH-01",name:"Junior Tour Short",rev:"A",fabric:"200 gsm stretch twill",colors:"Stone · Black",size:"Age 10 (sample)",g:J_SH,
+   items:["Snap front, elastic back waist","Tee loop","Wave-S 30 mm at left hem","Back pocket","Adjustable inner waistband"]}
+  ,{id:"sg-j-jg-01",x:4560,y:6720,style:"SG-J-JG-01",name:"Junior Jogger",rev:"A",fabric:"260 gsm double-knit",colors:"Black · Fog Grey",size:"Age 10 (sample)",g:J_JG,
+   items:["Elastic waist, inner drawcord","Flat drawcords","Side stripe piping","Wave-S 30 mm","Rib cuffs","Back pocket"]}
+  ,{id:"sg-j-cp-01",x:6080,y:6720,style:"SG-J-CP-01",name:"Junior Cap",rev:"A",fabric:"Washed cotton twill",colors:"Stone · White · Black",size:"Age 10 (sample)",g:J_CP,labels:["FRONT VIEW","SIDE VIEW"],
+   items:["Top button","Puff wave-S 40 mm","Brim with stripe binding","Velcro back, fits 50-55 cm","Low junior crown"]}
+  ,{id:"sg-j-gl-01",x:7600,y:6720,style:"SG-J-GL-01",name:"Junior Glove",rev:"A",fabric:"Synthetic leather palm, stretch back",colors:"White",size:"Age 10 (sample)",g:J_GL,labels:["BACK OF HAND","PALM"],
+   items:["Stretch knuckle band","Velcro tab with wave-S print","Stripe perforations","Reinforced palm"]}
+];
+
+const CSSV=getComputedStyle(document.documentElement);
+function R(str){return str.replace(/var\(--([a-z-]+)\)/g,(m,n)=>CSSV.getPropertyValue("--"+n).trim()||m);}
+document.querySelectorAll("svg [fill^='var'],svg [stroke^='var']").forEach(n=>{["fill","stroke"].forEach(a=>{const v=n.getAttribute(a);if(v&&v.startsWith("var"))n.setAttribute(a,R(v));});});
+function el(tag,attrs,html){if(html!=null)html=R(html);const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,typeof attrs[k]==="string"?R(attrs[k]):attrs[k]);if(html!=null)e.innerHTML=html;return e;}
+
+function dimLine(d){
+  let s=`<line x1="${d.x1}" y1="${d.y1}" x2="${d.x2}" y2="${d.y2}" stroke="var(--cyan)" stroke-width="1.2" marker-start="url(#arr)" marker-end="url(#arr)"/>`;
+  const mx=(d.x1+d.x2)/2,my=(d.y1+d.y2)/2,fs=d.small?11:12;
+  if(d.v){s+=`<text x="${mx+8}" y="${my}" fill="var(--cyan)" font-family="var(--mono)" font-size="${fs}" transform="rotate(90 ${mx+8} ${my})" text-anchor="middle">${d.t}</text>`;}
+  else{const ty=d.above?my-8:my+16;s+=`<text x="${mx}" y="${ty}" fill="var(--cyan)" font-family="var(--mono)" font-size="${fs}" text-anchor="middle">${d.t}</text>`;}
+  return s;
+}
+function callout(c){
+  return `<g><circle cx="${c[0]}" cy="${c[1]}" r="10" fill="var(--paper-deep)" stroke="var(--cyan)" stroke-width="1.4"/><text x="${c[0]}" y="${c[1]+4}" fill="var(--cyan)" font-family="var(--mono)" font-size="11" font-weight="500" text-anchor="middle">${c[2]}</text></g>`;
+}
+function view(g,side){
+  let s=`<path d="${g.outline[side]}" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linejoin="round"/>`;
+  g.solid[side].forEach(p=>s+=`<path d="${p}" fill="none" stroke="var(--line)" stroke-width="1.8" stroke-linecap="round"/>`);
+  g.dashed[side].forEach(p=>s+=`<path d="${p}" fill="none" stroke="var(--line)" stroke-width="1.1" stroke-dasharray="5 4" opacity=".85"/>`);
+  s+=g.extra[side];
+  const L=g.logo[side];
+  if(L){const sc=L[2]/256;s+=`<use href="#logo" fill="var(--line)" opacity="${L[3]||1}" transform="translate(${L[0]-L[2]/2} ${L[1]-L[2]/2}) scale(${sc})"/>`;}
+  g.dims[side].forEach(d=>s+=dimLine(d));
+  g.callouts[side].forEach(c=>s+=callout(c));
+  return s;
+}
+function sheetSVG(sh){
+  const W=1400,H=900;
+  let s=`<rect width="${W}" height="${H}" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="2"/>`;
+  s+=`<rect x="16" y="16" width="${W-32}" height="${H-32}" fill="none" stroke="var(--line)" stroke-width="1" opacity=".6"/>`;
+  s+=`<g transform="translate(24 44) scale(.9)">${view(sh.g,"front")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">${(sh.labels||[])[0]||"FRONT VIEW"}</text></g>`;
+  s+=`<g transform="translate(556 44) scale(.9)">${view(sh.g,"back")}<text x="300" y="700" fill="var(--dim)" font-family="var(--mono)" font-size="13" letter-spacing="2" text-anchor="middle">${(sh.labels||[])[1]||"BACK VIEW"}</text></g>`;
+  // title block
+  const tx=W-436,ty=H-236;
+  s+=`<g transform="translate(${tx} ${ty})" font-family="var(--mono)">
+    <rect width="420" height="220" fill="var(--paper-deep)" stroke="var(--line)" stroke-width="1.5"/>
+    <line x1="0" y1="64" x2="420" y2="64" stroke="var(--line)" stroke-width="1"/>
+    <line x1="0" y1="124" x2="420" y2="124" stroke="var(--line)" stroke-width="1" opacity=".6"/>
+    <line x1="0" y1="172" x2="420" y2="172" stroke="var(--line)" stroke-width="1" opacity=".6"/>
+    <line x1="210" y1="124" x2="210" y2="220" stroke="var(--line)" stroke-width="1" opacity=".6"/>
+    <use href="#logo" fill="var(--line)" transform="translate(16 14) scale(${36/256})"/>
+    <text x="64" y="32" fill="var(--line)" font-family="var(--display)" font-weight="700" font-size="22" letter-spacing="3">STRIPPED GOLF</text>
+    <text x="64" y="52" fill="var(--dim)" font-size="11" letter-spacing="1">TECHNICAL FLAT · NOT TO SCALE · CM</text>
+    <text x="16" y="88" fill="var(--dim)" font-size="10" letter-spacing="1">STYLE</text>
+    <text x="16" y="110" fill="var(--line)" font-family="var(--display)" font-weight="600" font-size="${(sh.style+sh.name).length>23?17:22}" letter-spacing="1">${sh.style} · ${sh.name.toUpperCase()}</text>
+    <text x="16" y="142" fill="var(--dim)" font-size="10" letter-spacing="1">SIZE</text><text x="16" y="162" fill="var(--line)" font-size="13">${sh.size}</text>
+    <text x="226" y="142" fill="var(--dim)" font-size="10" letter-spacing="1">REV / DATE</text><text x="226" y="162" fill="var(--line)" font-size="13">${sh.rev} · 2026-10-08</text>
+    <text x="16" y="190" fill="var(--dim)" font-size="10" letter-spacing="1">FABRIC</text><text x="16" y="208" fill="var(--line)" font-size="10.5">${sh.fabric.length>30?sh.fabric.slice(0,30)+"…":sh.fabric}</text>
+    <text x="226" y="190" fill="var(--dim)" font-size="10" letter-spacing="1">COLOURWAY</text><text x="226" y="208" fill="var(--line)" font-size="${(sh.colors||"Black · White · Stone").length>30?9:11}">${sh.colors||"Black · White · Stone"}</text>
+  </g>`;
+  // legend
+  s+=`<g transform="translate(40 ${H-60})" font-family="var(--mono)" font-size="11" fill="var(--dim)">
+    <line x1="0" y1="0" x2="34" y2="0" stroke="var(--line)" stroke-width="2"/><text x="42" y="4">SEAM / EDGE</text>
+    <line x1="150" y1="0" x2="184" y2="0" stroke="var(--line)" stroke-width="1.1" stroke-dasharray="5 4"/><text x="192" y="4">TOPSTITCH</text>
+    <line x1="290" y1="0" x2="324" y2="0" stroke="var(--cyan)" stroke-width="1.2"/><text x="332" y="4">MEASUREMENT</text>
+  </g>`;
+  return s;
+}
+
+// ghost sheet: where the next design goes
+function ghostSVG(){
+  return `<rect width="1400" height="900" fill="none" stroke="var(--dim)" stroke-width="2" stroke-dasharray="14 10" opacity=".6"/>
+  <text x="700" y="430" fill="var(--dim)" font-family="var(--display)" font-weight="600" font-size="40" letter-spacing="4" text-anchor="middle">NEXT SHEET</text>
+  <text x="700" y="470" fill="var(--dim)" font-family="var(--mono)" font-size="15" text-anchor="middle">Describe a garment to Claude and it gets drafted here</text>`;
+}
+
+SHEETS.forEach(sh=>{
+  const g=el("g",{transform:`translate(${sh.x} ${sh.y})`,"data-id":sh.id,tabindex:"0",role:"button","aria-label":`${sh.style} ${sh.name} sheet`,style:"cursor:pointer"},sheetSVG(sh));
+  sh.node=g;world.appendChild(g);
+});
+world.appendChild(el("g",{transform:"translate(6080 3360)"},ghostSVG()));
+[["POLOS · 5 STYLES",0,-30],["KNITWEAR · 4 STYLES",0,1090],["LAYERS & OUTERWEAR · 6 STYLES",0,2210],["BOTTOMS · 4 STYLES",0,3330],["HEADWEAR & ACCESSORIES · 9 STYLES",0,4450],["WOMEN'S · 8 STYLES",0,5570],["JUNIOR · AGES 4-14 · 6 STYLES",0,6690]].forEach(([t,x,y])=>world.appendChild(el("text",{x,y,fill:"var(--dim)","font-family":"var(--display)","font-weight":"600","font-size":"34","letter-spacing":"6"},t)));
+
+/* ---------- pan / zoom via viewBox ---------- */
+let vb={x:-200,y:-200,w:8000,h:2400};
+const BOUNDS={x:-80,y:-90,w:13720,h:7740};
+function apply(){
+  board.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const r=board.getBoundingClientRect();
+  const z=Math.min(r.width/vb.w,r.height/vb.h);
+  document.getElementById("zoomval").textContent=Math.round(z*100)+"%";
+}
+function fitTo(b,pad){
+  const r=board.getBoundingClientRect();pad=pad||0.08;
+  const aspect=r.width/r.height;
+  let w=b.w*(1+pad*2),h=b.h*(1+pad*2);
+  if(w/h<aspect)w=h*aspect;else h=w/aspect;
+  vb={x:b.x+b.w/2-w/2,y:b.y+b.h/2-h/2,w,h};apply();
+}
+function toWorld(cx,cy){
+  const r=board.getBoundingClientRect();
+  const s=Math.max(vb.w/r.width,vb.h/r.height);
+  const ox=(r.width*s-vb.w)/2,oy=(r.height*s-vb.h)/2;
+  return {x:vb.x-ox+(cx-r.left)*s,y:vb.y-oy+(cy-r.top)*s,s};
+}
+function zoomAt(cx,cy,f){
+  const p=toWorld(cx,cy);
+  const nw=Math.min(Math.max(vb.w*f,300),40000);const k=nw/vb.w;
+  vb={x:p.x-(p.x-vb.x)*k,y:p.y-(p.y-vb.y)*k,w:nw,h:vb.h*k};apply();
+}
+board.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,Math.exp(e.deltaY*0.0015));},{passive:false});
+
+const ptrs=new Map();let moved=0,pinch=null;
+board.addEventListener("pointerdown",e=>{board.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;board.classList.add("dragging");
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)};}});
+board.addEventListener("pointermove",e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const prev=ptrs.get(e.pointerId);const cur={x:e.clientX,y:e.clientY};ptrs.set(e.pointerId,cur);
+  if(ptrs.size===2&&pinch){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>0){zoomAt((a.x+b.x)/2,(a.y+b.y)/2,pinch.d/d);pinch.d=d;}moved+=10;return;}
+  const s=toWorld(0,0).s;const dx=cur.x-prev.x,dy=cur.y-prev.y;moved+=Math.abs(dx)+Math.abs(dy);
+  vb.x-=dx*s;vb.y-=dy*s;apply();
+});
+function endPtr(e){
+  const wasClick=ptrs.size===1&&moved<5;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;
+  if(!ptrs.size)board.classList.remove("dragging");
+  if(wasClick&&e.type==="pointerup"){const t=document.elementFromPoint(e.clientX,e.clientY);const g=t&&t.closest&&t.closest("[data-id]");if(g)select(g.getAttribute("data-id"));}
+}
+board.addEventListener("pointerup",endPtr);board.addEventListener("pointercancel",endPtr);
+
+/* ---------- selection, notes, copy ---------- */
+let current=null;
+const btnWrap=document.getElementById("sheetBtns");
+SHEETS.forEach(sh=>{const b=document.createElement("button");b.type="button";b.textContent=sh.style;b.id="btn-"+sh.id;b.addEventListener("click",()=>{select(sh.id);focusSheet(sh);});btnWrap.appendChild(b);
+  sh.node.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(sh.id);focusSheet(sh);}});});
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(_){return null;}}
+function select(id){
+  const sh=SHEETS.find(s=>s.id===id);if(!sh)return;current=sh;
+  SHEETS.forEach(s=>{document.getElementById("btn-"+s.id).setAttribute("aria-pressed",s===sh?"true":"false");s.node.querySelector("rect").setAttribute("stroke",R(s===sh?"var(--cyan)":"var(--line)"));});
+  document.getElementById("pMeta").textContent=`${sh.style} · Rev ${sh.rev} · ${sh.size}`;
+  document.getElementById("pTitle").textContent=sh.name;
+  document.getElementById("pCallouts").innerHTML=sh.items.map(t=>`<li>${t}</li>`).join("");
+  document.getElementById("notes").value=store("notes:"+sh.id)||"";
+  document.getElementById("status").textContent="";
+  store("lastSheet",sh.id);
+}
+function focusSheet(sh){fitTo({x:sh.x,y:sh.y,w:1400,h:900},0.04);}
+document.getElementById("notes").addEventListener("input",e=>{if(current)store("notes:"+current.id,e.target.value);});
+document.getElementById("focusBtn").addEventListener("click",()=>current&&focusSheet(current));
+document.getElementById("copySvg").addEventListener("click",()=>{
+  if(!current)return;
+  const inner=current.node.innerHTML;
+  const logo=document.getElementById("logo").outerHTML;const arr=document.getElementById("arr").outerHTML;
+  const out=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900"><defs>${logo}${arr}</defs>${inner}</svg>`;
+  const st=document.getElementById("status");
+  navigator.clipboard.writeText(out).then(()=>st.textContent="Copied. Paste into Figma or Illustrator, or save as .svg.").catch(()=>st.textContent="Copy was blocked here. Ask Claude for the SVG file instead.");
+});
+document.getElementById("zIn").addEventListener("click",()=>{const r=board.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,0.8);});
+document.getElementById("zOut").addEventListener("click",()=>{const r=board.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,1.25);});
+document.getElementById("fit").addEventListener("click",()=>fitTo(BOUNDS));
+window.addEventListener("resize",apply);
+
+select(store("lastSheet")||SHEETS[0].id);
+fitTo(BOUNDS);
+})();
+</script>
